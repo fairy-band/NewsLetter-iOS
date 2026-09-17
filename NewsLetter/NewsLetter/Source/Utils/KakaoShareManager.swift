@@ -31,21 +31,26 @@ final class KakaoShareManager: ObservableObject {
             return
         }
 
+        // 공유받은 사람이 앱으로 진입하면 AppReducer가 이 값으로 마크다운 상세를 띄운다
+        let executionParams = [
+            "exposureContentId": "\(id)",
+            "contentURL": contentURL,
+            "color": textColor.toHexString ?? ""
+        ]
+
         let content = Content(
             title: title,
             imageUrl: ogImageURL,
             imageWidth: 800,
             imageHeight: 400,
             description: "쏙 - 매일 뉴스레터 6개를 한눈에",
-            link: Link(iosExecutionParams: [:])
+            link: Link(iosExecutionParams: executionParams)
         )
 
         let buttons = [
             Button(
                 title: "앱으로 보기",
-                link: Link(
-                    iosExecutionParams: [:]
-                )
+                link: Link(iosExecutionParams: executionParams)
             )
         ]
 
