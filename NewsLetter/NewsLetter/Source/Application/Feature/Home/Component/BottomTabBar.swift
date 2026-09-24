@@ -23,30 +23,36 @@ struct BottomTabBar: View {
     @Binding var selectedTab: HomeReducer.Tab
 
     var body: some View {
+        let isDarkBackground = selectedTab != .recommend
+
         HStack(spacing: 0) {
             ForEach(Self.items) { item in
                 tabButton(for: item)
             }
         }
-        .frame(height: 48)
-        .background(ColorPalette.white)
+        .frame(height: 56)
+        .background(isDarkBackground ? Color.black : ColorPalette.white)
         .overlay(alignment: .top) {
             Rectangle()
-                .fill(ColorPalette.gray200)
+                .fill(isDarkBackground ? ColorPalette.gray800 : ColorPalette.gray200)
                 .frame(height: 1)
         }
-        .background(ColorPalette.white.ignoresSafeArea(edges: .bottom))
+        .background((isDarkBackground ? Color.black : ColorPalette.white).ignoresSafeArea(edges: .bottom))
     }
 
     private func tabButton(for item: Item) -> some View {
         let isSelected = selectedTab == item.tab
-        let foregroundColor = isSelected ? Color(hex: 0x121314) : Color(hex: 0x6B7580)
+        let isDarkBackground = selectedTab != .recommend
+        let iconName = item.tab == .archive && isSelected ? "bookmark_icon_selected" : item.iconName
+        let foregroundColor = isSelected
+            ? (isDarkBackground ? Color.white : Color(hex: 0x121314))
+            : Color(hex: 0x6B7580)
 
         return Button {
             selectedTab = item.tab
         } label: {
             VStack(spacing: 6) {
-                Image(item.iconName)
+                Image(iconName)
                     .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
@@ -56,7 +62,7 @@ struct BottomTabBar: View {
                     .font(isSelected ? .caption11_bold : .caption11_medium)
             }
             .foregroundStyle(foregroundColor)
-            .padding(.top, 7)
+            .padding(.top, 12)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .contentShape(Rectangle())
         }
