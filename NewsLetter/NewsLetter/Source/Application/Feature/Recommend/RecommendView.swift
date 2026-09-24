@@ -22,6 +22,7 @@ struct RecommendView: View {
     @Bindable var store: StoreOf<RecommendReducer>
     
     @Binding var selectedIndex: Int?
+    let settingButtonTapHandler: () -> Void
     
     @State private var scrolledID: Int?
     
@@ -42,8 +43,21 @@ struct RecommendView: View {
     
     var body: some View {
         VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                Button(action: settingButtonTapHandler) {
+                    Image("setting_icon")
+                        .renderingMode(.template)
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(.semanticColor.icon_strong)
+                        .padding(8)
+                }
+                .accessibilityLabel("설정")
+            }
+            .frame(height: 48)
+            .padding(.horizontal, 16)
             headerSection
-                .padding(.top, 8)
             if showEmptyError {
                 emptyErrorSection
                     .padding(.top, UIDevice.isLargeScreen ? 40 : 16)
@@ -295,5 +309,6 @@ extension UIDevice {
     RecommendView(
         store: Store(initialState: RecommendReducer.State()) { RecommendReducer() },
         selectedIndex: .constant(nil),
+        settingButtonTapHandler: {},
     )
 }
