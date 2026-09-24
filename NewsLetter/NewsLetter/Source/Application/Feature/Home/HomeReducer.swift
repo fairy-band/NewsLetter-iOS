@@ -29,6 +29,7 @@ struct HomeReducer {
         var recommendPath = StackState<Path.State>()
         var recommendState = RecommendReducer.State()
         var exploreState = ExploreReducer.State()
+        var archiveState = ArchiveReducer.State()
         var isPresentModal: Bool = false
         var isPresentExploreCard: Bool = false
         var isPresentNotificationPermissionBottomSheet: Bool = false
@@ -45,6 +46,7 @@ struct HomeReducer {
         case recommendPath(StackActionOf<Path>)
         case recommend(RecommendReducer.Action)
         case explore(ExploreReducer.Action)
+        case archive(ArchiveReducer.Action)
         case settingPressed
         case submitNewsletterReport(NewsletterReportRequestDTO)
         case setIsPresentReportSuccessToast(Bool)
@@ -61,6 +63,10 @@ struct HomeReducer {
         
         Scope(state: \.exploreState, action: \.explore) {
             ExploreReducer()
+        }
+
+        Scope(state: \.archiveState, action: \.archive) {
+            ArchiveReducer()
         }
         
         Reduce { state, action in

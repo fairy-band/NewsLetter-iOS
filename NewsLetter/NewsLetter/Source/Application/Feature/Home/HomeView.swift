@@ -46,7 +46,7 @@ struct HomeView: View {
             .tag(HomeReducer.Tab.explore)
 
             NavigationStack {
-                ArchiveView()
+                ArchiveView(store: store.scope(state: \.archiveState, action: \.archive))
             }
             .tabItem {
                 Image("bookmark_icon")
