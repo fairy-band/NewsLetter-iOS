@@ -10,7 +10,7 @@ import ComposableArchitecture
 struct ArchiveView: View {
     private enum Metric {
         static let horizontalPadding: CGFloat = 16
-        static let cardSpacing: CGFloat = 24
+        static let cardSpacing: CGFloat = 12
     }
 
     @Bindable var store: StoreOf<ArchiveReducer>
@@ -22,7 +22,6 @@ struct ArchiveView: View {
     var body: some View {
         VStack(spacing: 0) {
             sectionTabs
-            contentCount
             contentList
         }
         .background(Color.black.ignoresSafeArea())
@@ -34,23 +33,23 @@ struct ArchiveView: View {
                 Button {
                     store.send(.sectionSelected(section))
                 } label: {
-                    VStack(spacing: 0) {
+                    VStack(spacing: 14) {
                         Text(section.title)
-                            .font(section == store.selectedSection ? .head20_bold : .head20_medium)
+                            .font(section == store.selectedSection ? .body16_bold : .body16_medium)
                             .foregroundStyle(section == store.selectedSection ? Color.white : Color(hex: 0x6B7580))
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                         Rectangle()
                             .fill(Color.white)
                             .frame(height: 4)
                             .opacity(section == store.selectedSection ? 1 : 0)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 }
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(section == store.selectedSection ? .isSelected : [])
             }
         }
-        .frame(height: 88)
+        .frame(height: 56)
         .overlay(alignment: .bottom) {
             Rectangle()
                 .fill(ColorPalette.gray800)
@@ -66,26 +65,30 @@ struct ArchiveView: View {
                 .foregroundStyle(ColorPalette.gray400)
             Spacer()
         }
-        .font(.head20_bold)
+        .font(.body16_bold)
         .padding(.horizontal, Metric.horizontalPadding)
-        .padding(.top, 28)
-        .padding(.bottom, 34)
+        .padding(.top, 14)
+        .padding(.bottom, 16)
     }
 
     private var contentList: some View {
         ScrollView {
-            LazyVStack(spacing: Metric.cardSpacing) {
-                ForEach(contents) { content in
-                    ArchiveNewsletterCard(
-                        content: content,
-                        showsBookmark: store.selectedSection == .saved,
-                        bookmarkTapHandler: {
-                            store.send(.savedContentRemoved(content.id))
-                        }
-                    )
+            VStack(spacing: 0) {
+                contentCount
+
+                LazyVStack(spacing: Metric.cardSpacing) {
+                    ForEach(contents) { content in
+                        ArchiveNewsletterCard(
+                            content: content,
+                            showsBookmark: store.selectedSection == .saved,
+                            bookmarkTapHandler: {
+                                store.send(.savedContentRemoved(content.id))
+                            }
+                        )
+                    }
                 }
+                .padding(.horizontal, Metric.horizontalPadding)
             }
-            .padding(.horizontal, Metric.horizontalPadding)
             .padding(.bottom, 24)
         }
     }

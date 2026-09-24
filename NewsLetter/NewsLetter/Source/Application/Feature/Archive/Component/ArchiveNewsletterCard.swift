@@ -46,10 +46,10 @@ struct ArchiveNewsletterCard: View {
             .font(.body13_regular)
             .foregroundStyle(ColorPalette.gray950.opacity(0.5))
         }
-        .padding(32)
-        .frame(maxWidth: .infinity, minHeight: 224, alignment: .leading)
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 112, maxHeight: 112, alignment: .leading)
         .background(content.color.color)
-        .clipShape(RoundedRectangle(cornerRadius: 30))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
 
