@@ -12,6 +12,12 @@ import ComposableArchitecture
 
 @Reducer
 struct HomeReducer {
+    enum Tab: Hashable {
+        case recommend
+        case explore
+        case archive
+    }
+
     @Reducer
     enum Path {
         case setting(SettingReducer)
@@ -19,10 +25,10 @@ struct HomeReducer {
     
     @ObservableState
     struct State {
-        var path = StackState<Path.State>()
+        var selectedTab: Tab = .recommend
+        var recommendPath = StackState<Path.State>()
         var recommendState = RecommendReducer.State()
         var exploreState = ExploreReducer.State()
-        var selectedSegment: SegmentView.SegmentType = .recommend
         var isPresentModal: Bool = false
         var isPresentExploreCard: Bool = false
         var isPresentNotificationPermissionBottomSheet: Bool = false
@@ -36,7 +42,7 @@ struct HomeReducer {
     
     enum Action: BindableAction {
         case binding(BindingAction<State>)
-        case path(StackActionOf<Path>)
+        case recommendPath(StackActionOf<Path>)
         case recommend(RecommendReducer.Action)
         case explore(ExploreReducer.Action)
         case settingPressed
@@ -82,10 +88,10 @@ struct HomeReducer {
                 state.isPresentNewsletterReportBottomSheet = true
                 return .none
             case .settingPressed:
-                state.path.append(.setting(SettingReducer.State()))
+                state.recommendPath.append(.setting(SettingReducer.State()))
                 return .none
             // 설정 화면에서 직군/경력 정보가 갱신되면 추천 컨텐츠를 새로 불러옵니다.
-            case .path(.element(id: _, action: .setting(.delegate(.categoryUpdated)))):
+            case .recommendPath(.element(id: _, action: .setting(.delegate(.categoryUpdated)))):
                 state.recommendState.isCardLoading = true
                 return .send(.recommend(.fetchCards))
             case .submitNewsletterReport(let dto):
@@ -104,6 +110,6 @@ struct HomeReducer {
                 return .none
             }
         }
-        .forEach(\.path, action: \.path)
+        .forEach(\.recommendPath, action: \.recommendPath)
     }
 }
