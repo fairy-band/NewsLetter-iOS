@@ -32,6 +32,7 @@ struct HomeReducer {
         var archiveState = ArchiveReducer.State()
         var isPresentModal: Bool = false
         var isPresentExploreCard: Bool = false
+        var isPresentArchiveCard: Bool = false
         var isPresentNotificationPermissionBottomSheet: Bool = false
         var isPresentOnboardingJobBottomSheet: Bool = false
         var isPresentNewsletterReportBottomSheet: Bool = false
@@ -92,6 +93,9 @@ struct HomeReducer {
                 return .none
             case .explore(.delegate(.reportNewsletterButtonTapped)):
                 state.isPresentNewsletterReportBottomSheet = true
+                return .none
+            case .archive(.delegate(.presentArchiveCard)):
+                state.isPresentArchiveCard = true
                 return .none
             case .settingPressed:
                 state.recommendPath.append(.setting(SettingReducer.State()))

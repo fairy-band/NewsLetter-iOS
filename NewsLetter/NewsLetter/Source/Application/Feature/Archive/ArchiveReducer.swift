@@ -45,6 +45,60 @@ struct ArchiveNewsletter: Identifiable, Equatable {
     let keyword: String
     let newsletterName: String
     let color: ArchiveCardColor
+    let summary: String
+    let contentURL: String
+    let language: String
+    let kind: Card.Kind
+
+    init(
+        id: Int,
+        title: String,
+        keyword: String,
+        newsletterName: String,
+        color: ArchiveCardColor,
+        summary: String = "뉴스레터 본문 미리보기입니다.",
+        contentURL: String = "https://example.com",
+        language: String = "KOREAN",
+        kind: Card.Kind = .blog
+    ) {
+        self.id = id
+        self.title = title
+        self.keyword = keyword
+        self.newsletterName = newsletterName
+        self.color = color
+        self.summary = summary
+        self.contentURL = contentURL
+        self.language = language
+        self.kind = kind
+    }
+
+    var card: Card {
+        Card(
+            id: id,
+            title: title,
+            topKeyword: keyword,
+            summary: summary,
+            contentURL: contentURL,
+            imageURL: nil,
+            newsletterName: newsletterName,
+            language: language,
+            kind: kind
+        )
+    }
+
+    init(card: Card) {
+        self.init(
+            id: card.id,
+            title: card.title,
+            keyword: card.topKeyword,
+            newsletterName: card.newsletterName,
+            color: ArchiveCardColor.allCases[card.id % ArchiveCardColor.allCases.count],
+            summary: card.summary,
+            contentURL: card.contentURL,
+            language: card.language,
+            kind: card.kind
+        )
+    }
 }
 
 @Reducer
@@ -54,11 +108,20 @@ struct ArchiveReducer {
         var selectedSection: ArchiveSection = .saved
         var savedContents = ArchiveNewsletter.samples
         var sharedContents = ArchiveNewsletter.samples
+        var selectedContent: ArchiveNewsletter?
     }
 
     enum Action {
         case sectionSelected(ArchiveSection)
         case savedContentRemoved(Int)
+        case savedContentToggled(Card)
+        case contentSelected(ArchiveNewsletter)
+        case delegate(Delegate)
+    }
+
+    @CasePathable
+    enum Delegate {
+        case presentArchiveCard
     }
 
     var body: some ReducerOf<Self> {
@@ -70,6 +133,21 @@ struct ArchiveReducer {
 
             case .savedContentRemoved(let id):
                 state.savedContents.removeAll { $0.id == id }
+                return .none
+
+            case .savedContentToggled(let card):
+                if state.savedContents.contains(where: { $0.id == card.id }) {
+                    state.savedContents.removeAll { $0.id == card.id }
+                } else {
+                    state.savedContents.append(ArchiveNewsletter(card: card))
+                }
+                return .none
+
+            case .contentSelected(let content):
+                state.selectedContent = content
+                return .send(.delegate(.presentArchiveCard))
+
+            case .delegate:
                 return .none
             }
         }

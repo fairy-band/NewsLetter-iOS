@@ -65,7 +65,11 @@ struct HomeView: View {
                     index: selectedIndex,
                     cardData: store.recommendState.cardData[selectedIndex],
                     pointColor: store.recommendState.cardColors[selectedIndex].sub,
-                    firstLookHandler: { store.isPresentNotificationPermissionBottomSheet = true }
+                    firstLookHandler: { store.isPresentNotificationPermissionBottomSheet = true },
+                    isBookmarked: isBookmarked(store.recommendState.cardData[selectedIndex]),
+                    bookmarkTapHandler: {
+                        toggleBookmark(store.recommendState.cardData[selectedIndex])
+                    }
                 )
                 .frame(width: Device.width)
                 .transition(.opacity)
@@ -77,7 +81,26 @@ struct HomeView: View {
                 ExploreCardModalView(
                     isPresented: $store.isPresentExploreCard,
                     cardData: card,
-                    pointColor: colorPaletteName.color.toChangeColor()
+                    pointColor: colorPaletteName.color.toChangeColor(),
+                    isDetailAnalyticsEnabled: true,
+                    isBookmarked: isBookmarked(card),
+                    bookmarkTapHandler: { toggleBookmark(card) }
+                )
+                .frame(width: Device.width)
+                .transition(.opacity)
+                .zIndex(Z.carouselModal)
+            }
+        }
+        .overlay {
+            if store.isPresentArchiveCard,
+               let content = store.archiveState.selectedContent {
+                ExploreCardModalView(
+                    isPresented: $store.isPresentArchiveCard,
+                    cardData: content.card,
+                    pointColor: content.color.color.toChangeColor(),
+                    isDetailAnalyticsEnabled: false,
+                    isBookmarked: isBookmarked(content.card),
+                    bookmarkTapHandler: { toggleBookmark(content.card) }
                 )
                 .frame(width: Device.width)
                 .transition(.opacity)
@@ -153,11 +176,20 @@ struct HomeView: View {
         )
         .animation(.easeInOut, value: store.isPresentModal)
         .animation(.easeInOut, value: store.isPresentExploreCard)
+        .animation(.easeInOut, value: store.isPresentArchiveCard)
     }
     
     private func requestJobChangeConfirmation(commit: @escaping () -> Void) {
         pendingJobChangeCommit = commit
         isPresentJobChangeConfirmAlert = true
+    }
+
+    private func isBookmarked(_ card: Card) -> Bool {
+        store.archiveState.savedContents.contains { $0.id == card.id }
+    }
+
+    private func toggleBookmark(_ card: Card) {
+        store.send(.archive(.savedContentToggled(card)))
     }
 
     private func onboardingJobDetailBottomSheetConfirmHandler(
