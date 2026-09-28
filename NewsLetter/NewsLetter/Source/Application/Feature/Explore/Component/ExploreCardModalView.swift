@@ -18,6 +18,9 @@ struct ExploreCardModalView: View {
     
     let cardData: Card
     let pointColor: Color
+    let isDetailAnalyticsEnabled: Bool
+    let isBookmarked: Bool
+    let bookmarkTapHandler: () -> Void
     
     // TODO: Figma 디자인 요구사항에 맞게 고도화 필요.
     var body: some View {
@@ -52,7 +55,10 @@ struct ExploreCardModalView: View {
                 card: cardData,
                 index: 0, // FIXME: index 값 여기선 의미가 없으므로 일단 0 대입
                 pointColor: pointColor,
-                isShareEnabled: false
+                isShareEnabled: false,
+                isDetailAnalyticsEnabled: isDetailAnalyticsEnabled,
+                isBookmarked: isBookmarked,
+                bookmarkTapHandler: bookmarkTapHandler
             )
             .frame(width: Metric.cardWidth)
         }
@@ -64,5 +70,8 @@ struct ExploreCardModalView: View {
         isPresented: .constant(true),
         cardData: .stub(),
         pointColor: ColorPalette.pointPurple600,
+        isDetailAnalyticsEnabled: true,
+        isBookmarked: false,
+        bookmarkTapHandler: {}
     )
 }

@@ -83,6 +83,9 @@ struct ArchiveView: View {
                             showsBookmark: store.selectedSection == .saved,
                             bookmarkTapHandler: {
                                 store.send(.savedContentRemoved(content.id))
+                            },
+                            contentTapHandler: {
+                                store.send(.contentSelected(content))
                             }
                         )
                     }

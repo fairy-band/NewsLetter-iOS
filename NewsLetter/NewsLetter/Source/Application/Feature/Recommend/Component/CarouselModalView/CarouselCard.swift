@@ -24,14 +24,52 @@ struct CarouselCard: View {
     let index: Int
     let pointColor: Color
     let isShareEnabled: Bool
+    let isDetailAnalyticsEnabled: Bool
     var cardType: String = "recommend"
+    let isBookmarked: Bool
+    let bookmarkTapHandler: () -> Void
+
+    init(
+        card: Card,
+        index: Int,
+        pointColor: Color,
+        isShareEnabled: Bool,
+        isDetailAnalyticsEnabled: Bool,
+        cardType: String = "recommend",
+        isBookmarked: Bool = false,
+        bookmarkTapHandler: @escaping () -> Void = {}
+    ) {
+        self.card = card
+        self.index = index
+        self.pointColor = pointColor
+        self.isShareEnabled = isShareEnabled
+        self.isDetailAnalyticsEnabled = isDetailAnalyticsEnabled
+        self.cardType = cardType
+        self.isBookmarked = isBookmarked
+        self.bookmarkTapHandler = bookmarkTapHandler
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(card.title)
-                .fontRangeLimited()
-                .font(.head20_bold)
-                .foregroundStyle(pointColor)
+            HStack(alignment: .top, spacing: 12) {
+                Text(card.title)
+                    .fontRangeLimited()
+                    .font(.head20_bold)
+                    .foregroundStyle(pointColor)
+
+                Spacer(minLength: 0)
+
+                Button(action: bookmarkTapHandler) {
+                    Image(isBookmarked ? "bookmark_icon_selected" : "bookmark_icon")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 22)
+                        .foregroundStyle(pointColor)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isBookmarked ? "저장 해제" : "저장")
+            }
 
             HStack(spacing: 6) {
                 Text(card.displayLanguage)
@@ -56,7 +94,7 @@ struct CarouselCard: View {
             }
             .foregroundStyle(pointColor)
             .padding(.top, 4)
-            
+
             Text(card.summary)
                 .fontRangeLimited()
                 .font(.body14_regular)
@@ -93,19 +131,21 @@ struct CarouselCard: View {
 
                 Button {
                     isMarkdownPresented = true
-                    if isShareEnabled {
-                        GA.main_contents_detail_click(
-                            cardType: cardType,
-                            contentType: card.kind.gaContentType,
-                            contentTitle: card.title,
-                            contentId: card.id
-                        )
-                    } else {
-                        GA.explore_contents_detail_click(
-                            contentType: card.kind.gaContentType,
-                            contentTitle: card.title,
-                            contentId: card.id
-                        )
+                    if isDetailAnalyticsEnabled {
+                        if isShareEnabled {
+                            GA.main_contents_detail_click(
+                                cardType: cardType,
+                                contentType: card.kind.gaContentType,
+                                contentTitle: card.title,
+                                contentId: card.id
+                            )
+                        } else {
+                            GA.explore_contents_detail_click(
+                                contentType: card.kind.gaContentType,
+                                contentTitle: card.title,
+                                contentId: card.id
+                            )
+                        }
                     }
                 } label: {
                     RoundedRectangle(cornerRadius: Metric.nextButtonCornerRadius)
@@ -131,12 +171,20 @@ struct CarouselCard: View {
                 exposureContentId: card.id,
                 contentURL: card.contentURL,
                 pointColor: pointColor,
-                isPresented: $isMarkdownPresented
+                isPresented: $isMarkdownPresented,
+                isBookmarked: isBookmarked,
+                bookmarkTapHandler: bookmarkTapHandler
             )
         }
     }
 }
 
 #Preview {
-    CarouselCard(card: .stub(), index: 0, pointColor: ColorPalette.pointPink500, isShareEnabled: true)
+    CarouselCard(
+        card: .stub(),
+        index: 0,
+        pointColor: ColorPalette.pointPink500,
+        isShareEnabled: true,
+        isDetailAnalyticsEnabled: true
+    )
 }
