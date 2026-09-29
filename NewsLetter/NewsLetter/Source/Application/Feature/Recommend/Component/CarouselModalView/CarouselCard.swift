@@ -25,6 +25,7 @@ struct CarouselCard: View {
     let pointColor: Color
     let isShareEnabled: Bool
     let isDetailAnalyticsEnabled: Bool
+    let isExploreDetailAnalytics: Bool
     var cardType: String = "recommend"
     let isBookmarked: Bool
     let bookmarkTapHandler: () -> Void
@@ -35,6 +36,7 @@ struct CarouselCard: View {
         pointColor: Color,
         isShareEnabled: Bool,
         isDetailAnalyticsEnabled: Bool,
+        isExploreDetailAnalytics: Bool = false,
         cardType: String = "recommend",
         isBookmarked: Bool = false,
         bookmarkTapHandler: @escaping () -> Void = {}
@@ -44,6 +46,7 @@ struct CarouselCard: View {
         self.pointColor = pointColor
         self.isShareEnabled = isShareEnabled
         self.isDetailAnalyticsEnabled = isDetailAnalyticsEnabled
+        self.isExploreDetailAnalytics = isExploreDetailAnalytics
         self.cardType = cardType
         self.isBookmarked = isBookmarked
         self.bookmarkTapHandler = bookmarkTapHandler
@@ -51,25 +54,10 @@ struct CarouselCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top, spacing: 12) {
-                Text(card.title)
-                    .fontRangeLimited()
-                    .font(.head20_bold)
-                    .foregroundStyle(pointColor)
-
-                Spacer(minLength: 0)
-
-                Button(action: bookmarkTapHandler) {
-                    Image(isBookmarked ? "bookmark_icon_selected" : "bookmark_icon")
-                        .renderingMode(.template)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 22)
-                        .foregroundStyle(pointColor)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(isBookmarked ? "저장 해제" : "저장")
-            }
+            Text(card.title)
+                .fontRangeLimited()
+                .font(.head20_bold)
+                .foregroundStyle(pointColor)
 
             HStack(spacing: 6) {
                 Text(card.displayLanguage)
@@ -103,6 +91,38 @@ struct CarouselCard: View {
             Spacer()
             
             HStack(spacing: 8) {
+                Button {
+                    isMarkdownPresented = true
+                    if isDetailAnalyticsEnabled {
+                        if isExploreDetailAnalytics {
+                            GA.explore_contents_detail_click(
+                                contentType: card.kind.gaContentType,
+                                contentTitle: card.title,
+                                contentId: card.id
+                            )
+                        } else if isShareEnabled {
+                            GA.main_contents_detail_click(
+                                cardType: cardType,
+                                contentType: card.kind.gaContentType,
+                                contentTitle: card.title,
+                                contentId: card.id
+                            )
+                        }
+                    }
+                } label: {
+                    RoundedRectangle(cornerRadius: Metric.nextButtonCornerRadius)
+                        .stroke(.semanticColor.border_secondary, style: .init(lineWidth: 1))
+                        .background(ColorPalette.white)
+                        .frame(height: Metric.nextButtonHeight)
+                        .overlay {
+                            Text("원문 보기")
+                                .fontRangeLimited()
+                                .font(.body14_semiBold)
+                                .foregroundStyle(.semanticColor.text_primary)
+                        }
+                }
+                .layoutPriority(1)
+
                 if isShareEnabled {
                     Button {
                         Task {
@@ -123,42 +143,28 @@ struct CarouselCard: View {
                                     .resizable()
                                     .frame(width: 24, height: 24)
                                     .foregroundStyle(.semanticColor.text_primary)
-                                
                             }
                     }
                     .foregroundStyle(.semanticColor.text_primary)
                 }
 
-                Button {
-                    isMarkdownPresented = true
-                    if isDetailAnalyticsEnabled {
-                        if isShareEnabled {
-                            GA.main_contents_detail_click(
-                                cardType: cardType,
-                                contentType: card.kind.gaContentType,
-                                contentTitle: card.title,
-                                contentId: card.id
-                            )
-                        } else {
-                            GA.explore_contents_detail_click(
-                                contentType: card.kind.gaContentType,
-                                contentTitle: card.title,
-                                contentId: card.id
-                            )
-                        }
-                    }
-                } label: {
-                    RoundedRectangle(cornerRadius: Metric.nextButtonCornerRadius)
-                        .stroke(.semanticColor.border_secondary, style: .init(lineWidth: 1))
-                        .background(ColorPalette.white)
-                        .frame(height: Metric.nextButtonHeight)
+                Button(action: bookmarkTapHandler) {
+                    Circle()
+                        .fill(ColorPalette.white)
+                        .frame(width: Metric.shareButtonSize, height: Metric.shareButtonSize)
                         .overlay {
-                            Text("자세히 보기")
-                                .fontRangeLimited()
-                                .font(.body14_semiBold)
+                            Circle()
+                                .stroke(.semanticColor.border_secondary, style: .init(lineWidth: 1))
+                            Image(isBookmarked ? "bookmark_icon_selected" : "bookmark_icon")
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
                                 .foregroundStyle(.semanticColor.text_primary)
                         }
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isBookmarked ? "저장 해제" : "저장")
             }
             .padding(.top, 16)
         }

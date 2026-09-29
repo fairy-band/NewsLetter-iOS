@@ -55,6 +55,9 @@ struct HomeView: View {
             .tag(HomeReducer.Tab.archive)
         }
         .toolbar(.hidden, for: .tabBar)
+        .onAppear {
+            store.send(.archive(.onAppear))
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             BottomTabBar(selectedTab: $store.selectedTab)
         }
@@ -83,6 +86,8 @@ struct HomeView: View {
                     cardData: card,
                     pointColor: colorPaletteName.color.toChangeColor(),
                     isDetailAnalyticsEnabled: true,
+                    isExploreDetailAnalytics: true,
+                    isShareEnabled: true,
                     isBookmarked: isBookmarked(card),
                     bookmarkTapHandler: { toggleBookmark(card) }
                 )
@@ -99,6 +104,8 @@ struct HomeView: View {
                     cardData: content.card,
                     pointColor: content.color.color.toChangeColor(),
                     isDetailAnalyticsEnabled: false,
+                    isExploreDetailAnalytics: false,
+                    isShareEnabled: false,
                     isBookmarked: isBookmarked(content.card),
                     bookmarkTapHandler: { toggleBookmark(content.card) }
                 )
@@ -189,7 +196,7 @@ struct HomeView: View {
     }
 
     private func toggleBookmark(_ card: Card) {
-        store.send(.archive(.savedContentToggled(card)))
+        store.send(.archive(.bookmarkToggled(card)))
     }
 
     private func onboardingJobDetailBottomSheetConfirmHandler(

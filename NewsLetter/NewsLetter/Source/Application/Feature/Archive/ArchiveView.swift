@@ -25,6 +25,9 @@ struct ArchiveView: View {
             contentList
         }
         .background(Color.black.ignoresSafeArea())
+        .onAppear {
+            store.send(.onAppear)
+        }
     }
 
     private var sectionTabs: some View {
@@ -82,7 +85,7 @@ struct ArchiveView: View {
                             content: content,
                             showsBookmark: store.selectedSection == .saved,
                             bookmarkTapHandler: {
-                                store.send(.savedContentRemoved(content.id))
+                                store.send(.bookmarkToggled(content.card))
                             },
                             contentTapHandler: {
                                 store.send(.contentSelected(content))

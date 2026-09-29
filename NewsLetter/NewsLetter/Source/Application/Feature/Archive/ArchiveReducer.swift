@@ -25,7 +25,16 @@ enum ArchiveCardColor: CaseIterable {
     case purple
     case mint
     case pink
+    case orange
     case green
+
+    static let rotation: [ArchiveCardColor] = [
+        .blue, .lemonYellow, .purple, .mint, .pink, .orange, .green
+    ]
+
+    static func color(for index: Int) -> ArchiveCardColor {
+        rotation[index % rotation.count]
+    }
 
     var color: Color {
         switch self {
@@ -34,6 +43,7 @@ enum ArchiveCardColor: CaseIterable {
         case .purple: return ColorPalette.pointPurple200
         case .mint: return ColorPalette.pointMint300
         case .pink: return ColorPalette.pointPink300
+        case .orange: return ColorPalette.pointOrange300
         case .green: return ColorPalette.pointGreen300
         }
     }
@@ -86,13 +96,13 @@ struct ArchiveNewsletter: Identifiable, Equatable {
         )
     }
 
-    init(card: Card) {
+    init(card: Card, color: ArchiveCardColor) {
         self.init(
             id: card.id,
             title: card.title,
             keyword: card.topKeyword,
             newsletterName: card.newsletterName,
-            color: ArchiveCardColor.allCases[card.id % ArchiveCardColor.allCases.count],
+            color: color,
             summary: card.summary,
             contentURL: card.contentURL,
             language: card.language,
@@ -106,15 +116,22 @@ struct ArchiveReducer {
     @ObservableState
     struct State {
         var selectedSection: ArchiveSection = .saved
-        var savedContents = ArchiveNewsletter.samples
-        var sharedContents = ArchiveNewsletter.samples
+        var savedContents: [ArchiveNewsletter] = []
+        var sharedContents: [ArchiveNewsletter] = []
         var selectedContent: ArchiveNewsletter?
+        var isSavedContentsLoading = false
+        var isSharedContentsLoading = false
     }
 
     enum Action {
+        case onAppear
+        case fetchSavedContents(Int)
+        case savedContentsResponse(Result<[Card], Error>)
+        case fetchSharedContents(Int)
+        case sharedContentsResponse(Result<[Card], Error>)
         case sectionSelected(ArchiveSection)
-        case savedContentRemoved(Int)
-        case savedContentToggled(Card)
+        case bookmarkToggled(Card)
+        case bookmarkUpdateFinished(Result<Void, Error>, Card, removedContent: ArchiveNewsletter?)
         case contentSelected(ArchiveNewsletter)
         case delegate(Delegate)
     }
@@ -124,23 +141,113 @@ struct ArchiveReducer {
         case presentArchiveCard
     }
 
+    @Dependency(\.bookmarkClient) var bookmarkClient
+    @Dependency(\.sharedContentClient) var sharedContentClient
+
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .onAppear:
+                guard let userId = UserInfo.userId else { return .none }
+                return .merge(
+                    state.isSavedContentsLoading ? .none : .send(.fetchSavedContents(userId)),
+                    state.isSharedContentsLoading ? .none : .send(.fetchSharedContents(userId))
+                )
+
+            case .fetchSavedContents(let userId):
+                state.isSavedContentsLoading = true
+                return .run { send in
+                    do {
+                        let cards = try await bookmarkClient.fetchBookmarks(
+                            FetchBookmarksRequestDTO(userId: userId)
+                        )
+                        await send(.savedContentsResponse(.success(cards)))
+                    } catch {
+                        await send(.savedContentsResponse(.failure(error)))
+                    }
+                }
+
+            case .savedContentsResponse(.success(let cards)):
+                state.savedContents = cards.enumerated().map { index, card in
+                    ArchiveNewsletter(card: card, color: ArchiveCardColor.color(for: index))
+                }
+                state.isSavedContentsLoading = false
+                return .none
+
+            case .savedContentsResponse(.failure(let error)):
+                state.isSavedContentsLoading = false
+                print("[ArchiveReducer] fetchBookmarks error: \(error.localizedDescription)")
+                return .none
+
+            case .fetchSharedContents(let userId):
+                state.isSharedContentsLoading = true
+                return .run { send in
+                    do {
+                        let cards = try await sharedContentClient.fetchSharedContents(
+                            FetchSharedContentsRequestDTO(userId: userId)
+                        )
+                        await send(.sharedContentsResponse(.success(cards)))
+                    } catch {
+                        await send(.sharedContentsResponse(.failure(error)))
+                    }
+                }
+
+            case .sharedContentsResponse(.success(let cards)):
+                state.sharedContents = cards.enumerated().map { index, card in
+                    ArchiveNewsletter(card: card, color: ArchiveCardColor.color(for: index))
+                }
+                state.isSharedContentsLoading = false
+                return .none
+
+            case .sharedContentsResponse(.failure(let error)):
+                state.isSharedContentsLoading = false
+                print("[ArchiveReducer] fetchSharedContents error: \(error.localizedDescription)")
+                return .none
+
             case .sectionSelected(let section):
                 state.selectedSection = section
                 return .none
 
-            case .savedContentRemoved(let id):
-                state.savedContents.removeAll { $0.id == id }
-                return .none
+            case .bookmarkToggled(let card):
+                guard let userId = UserInfo.userId else { return .none }
 
-            case .savedContentToggled(let card):
-                if state.savedContents.contains(where: { $0.id == card.id }) {
+                let removedContent = state.savedContents.first { $0.id == card.id }
+                if removedContent != nil {
                     state.savedContents.removeAll { $0.id == card.id }
                 } else {
-                    state.savedContents.append(ArchiveNewsletter(card: card))
+                    state.savedContents.append(
+                        ArchiveNewsletter(
+                            card: card,
+                            color: ArchiveCardColor.color(for: state.savedContents.count)
+                        )
+                    )
                 }
+
+                return .run { send in
+                    do {
+                        try await bookmarkClient.updateBookmark(
+                            UpdateBookmarkRequestDTO(
+                                userId: userId,
+                                exposureContentId: card.id,
+                                isBookmarked: removedContent == nil
+                            )
+                        )
+                        await send(.bookmarkUpdateFinished(.success(()), card, removedContent: removedContent))
+                    } catch {
+                        await send(.bookmarkUpdateFinished(.failure(error), card, removedContent: removedContent))
+                    }
+                }
+
+            case .bookmarkUpdateFinished(.success, _, _):
+                return .none
+
+            case .bookmarkUpdateFinished(.failure(let error), let card, let removedContent):
+                if let removedContent {
+                    state.savedContents.append(removedContent)
+                } else {
+                    state.savedContents.removeAll { $0.id == card.id }
+                }
+                print("[ArchiveReducer] updateBookmark error: \(error.localizedDescription)")
                 return .none
 
             case .contentSelected(let content):
