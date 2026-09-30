@@ -105,7 +105,7 @@ struct HomeView: View {
                     pointColor: content.color.color.toChangeColor(),
                     isDetailAnalyticsEnabled: false,
                     isExploreDetailAnalytics: false,
-                    isShareEnabled: false,
+                    isShareEnabled: true,
                     isBookmarked: isBookmarked(content.card),
                     bookmarkTapHandler: { toggleBookmark(content.card) }
                 )
