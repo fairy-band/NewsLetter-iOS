@@ -30,8 +30,10 @@ struct AppReducer {
         var home = HomeReducer.State()
         var isLoading: Bool = false
         var isFirstAppear: Bool = true
+        var isRemoteConfigResolved: Bool = false
         var updateStatus: UpdateStatus = .none
         var sharedContent: SharedContent?
+        var pendingSharedContent: SharedContent?
     }
 
     enum Action {
@@ -66,6 +68,7 @@ struct AppReducer {
                 
             case .remoteConfigResponse(.success(let config)):
                 state.isLoading = false
+                state.isRemoteConfigResolved = true
 
                 let currentVersion = AppInfo.appVersion
                 if currentVersion.compare(config.minVersion, options: .numeric) == .orderedAscending {
@@ -75,12 +78,22 @@ struct AppReducer {
                 } else {
                     state.updateStatus = .none
                 }
+
+                if case .forced = state.updateStatus {
+                    state.pendingSharedContent = nil
+                } else {
+                    state.sharedContent = state.pendingSharedContent
+                    state.pendingSharedContent = nil
+                }
                 return .none
 
             case .remoteConfigResponse(.failure(let error)):
                 print("Remote Config Fetch Error: \(error.localizedDescription)")
                 state.isLoading = false
+                state.isRemoteConfigResolved = true
                 state.updateStatus = .none
+                state.sharedContent = state.pendingSharedContent
+                state.pendingSharedContent = nil
                 return .none
             case let .setUpdateStatus(status):
                 state.updateStatus = status
@@ -93,11 +106,21 @@ struct AppReducer {
                 func value(_ name: String) -> String? { items.first { $0.name == name }?.value }
                 guard let id = value("exposureContentId").flatMap(Int.init) else { return .none }
 
-                state.sharedContent = SharedContent(
+                let content = SharedContent(
                     id: id,
                     contentURL: value("contentURL") ?? "",
                     colorHex: Self.validHex(value("color")) ?? Self.defaultColorHex
                 )
+
+                guard state.isRemoteConfigResolved else {
+                    state.pendingSharedContent = content
+                    return .none
+                }
+
+                guard case .forced = state.updateStatus else {
+                    state.sharedContent = content
+                    return .none
+                }
                 return .none
 
             case let .setSharedContent(content):

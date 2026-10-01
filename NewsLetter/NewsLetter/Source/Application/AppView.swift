@@ -56,10 +56,7 @@ struct AppView: View {
             else if case let .optional(_, message) = store.updateStatus { Text(message) }
         }
         .fullScreenCover(
-            item: Binding(
-                get: { store.sharedContent },
-                set: { store.send(.setSharedContent($0)) }
-            )
+            item: $store.sharedContent.sending(\.setSharedContent)
         ) { content in
             MarkdownDetailView(
                 exposureContentId: content.id,
