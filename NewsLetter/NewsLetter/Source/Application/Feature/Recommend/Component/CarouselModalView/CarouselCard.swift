@@ -24,7 +24,33 @@ struct CarouselCard: View {
     let index: Int
     let pointColor: Color
     let isShareEnabled: Bool
+    let isDetailAnalyticsEnabled: Bool
+    let isExploreDetailAnalytics: Bool
     var cardType: String = "recommend"
+    let isBookmarked: Bool
+    let bookmarkTapHandler: () -> Void
+
+    init(
+        card: Card,
+        index: Int,
+        pointColor: Color,
+        isShareEnabled: Bool,
+        isDetailAnalyticsEnabled: Bool,
+        isExploreDetailAnalytics: Bool = false,
+        cardType: String = "recommend",
+        isBookmarked: Bool = false,
+        bookmarkTapHandler: @escaping () -> Void = {}
+    ) {
+        self.card = card
+        self.index = index
+        self.pointColor = pointColor
+        self.isShareEnabled = isShareEnabled
+        self.isDetailAnalyticsEnabled = isDetailAnalyticsEnabled
+        self.isExploreDetailAnalytics = isExploreDetailAnalytics
+        self.cardType = cardType
+        self.isBookmarked = isBookmarked
+        self.bookmarkTapHandler = bookmarkTapHandler
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -56,7 +82,7 @@ struct CarouselCard: View {
             }
             .foregroundStyle(pointColor)
             .padding(.top, 4)
-            
+
             Text(card.summary)
                 .fontRangeLimited()
                 .font(.body14_regular)
@@ -65,6 +91,38 @@ struct CarouselCard: View {
             Spacer()
             
             HStack(spacing: 8) {
+                Button {
+                    isMarkdownPresented = true
+                    if isDetailAnalyticsEnabled {
+                        if isExploreDetailAnalytics {
+                            GA.explore_contents_detail_click(
+                                contentType: card.kind.gaContentType,
+                                contentTitle: card.title,
+                                contentId: card.id
+                            )
+                        } else if isShareEnabled {
+                            GA.main_contents_detail_click(
+                                cardType: cardType,
+                                contentType: card.kind.gaContentType,
+                                contentTitle: card.title,
+                                contentId: card.id
+                            )
+                        }
+                    }
+                } label: {
+                    RoundedRectangle(cornerRadius: Metric.nextButtonCornerRadius)
+                        .stroke(.semanticColor.border_secondary, style: .init(lineWidth: 1))
+                        .background(ColorPalette.white)
+                        .frame(height: Metric.nextButtonHeight)
+                        .overlay {
+                            Text("원문 보기")
+                                .fontRangeLimited()
+                                .font(.body14_semiBold)
+                                .foregroundStyle(.semanticColor.text_primary)
+                        }
+                }
+                .layoutPriority(1)
+
                 if isShareEnabled {
                     Button {
                         Task {
@@ -85,40 +143,28 @@ struct CarouselCard: View {
                                     .resizable()
                                     .frame(width: 24, height: 24)
                                     .foregroundStyle(.semanticColor.text_primary)
-                                
                             }
                     }
                     .foregroundStyle(.semanticColor.text_primary)
                 }
 
-                Button {
-                    isMarkdownPresented = true
-                    if isShareEnabled {
-                        GA.main_contents_detail_click(
-                            cardType: cardType,
-                            contentType: card.kind.gaContentType,
-                            contentTitle: card.title,
-                            contentId: card.id
-                        )
-                    } else {
-                        GA.explore_contents_detail_click(
-                            contentType: card.kind.gaContentType,
-                            contentTitle: card.title,
-                            contentId: card.id
-                        )
-                    }
-                } label: {
-                    RoundedRectangle(cornerRadius: Metric.nextButtonCornerRadius)
-                        .stroke(.semanticColor.border_secondary, style: .init(lineWidth: 1))
-                        .background(ColorPalette.white)
-                        .frame(height: Metric.nextButtonHeight)
+                Button(action: bookmarkTapHandler) {
+                    Circle()
+                        .fill(ColorPalette.white)
+                        .frame(width: Metric.shareButtonSize, height: Metric.shareButtonSize)
                         .overlay {
-                            Text("자세히 보기")
-                                .fontRangeLimited()
-                                .font(.body14_semiBold)
+                            Circle()
+                                .stroke(.semanticColor.border_secondary, style: .init(lineWidth: 1))
+                            Image(isBookmarked ? "bookmark_icon_selected" : "bookmark_icon")
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
                                 .foregroundStyle(.semanticColor.text_primary)
                         }
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isBookmarked ? "저장 해제" : "저장")
             }
             .padding(.top, 16)
         }
@@ -131,12 +177,20 @@ struct CarouselCard: View {
                 exposureContentId: card.id,
                 contentURL: card.contentURL,
                 pointColor: pointColor,
-                isPresented: $isMarkdownPresented
+                isPresented: $isMarkdownPresented,
+                isBookmarked: isBookmarked,
+                bookmarkTapHandler: bookmarkTapHandler
             )
         }
     }
 }
 
 #Preview {
-    CarouselCard(card: .stub(), index: 0, pointColor: ColorPalette.pointPink500, isShareEnabled: true)
+    CarouselCard(
+        card: .stub(),
+        index: 0,
+        pointColor: ColorPalette.pointPink500,
+        isShareEnabled: true,
+        isDetailAnalyticsEnabled: true
+    )
 }
