@@ -129,6 +129,8 @@ struct ArchiveReducer {
         case savedContentsResponse(Result<[Card], Error>)
         case fetchSharedContents(Int)
         case sharedContentsResponse(Result<[Card], Error>)
+        case sharedContentOpened(Int)
+        case sharedContentOpenedResponse(Result<[Card], Error>, exposureContentID: Int)
         case sectionSelected(ArchiveSection)
         case bookmarkToggled(Card)
         case bookmarkUpdateFinished(Result<Void, Error>, Card, removedContent: ArchiveNewsletter?)
@@ -143,6 +145,10 @@ struct ArchiveReducer {
 
     @Dependency(\.bookmarkClient) var bookmarkClient
     @Dependency(\.sharedContentClient) var sharedContentClient
+
+    private enum CancelID {
+        case sharedContentsRequest
+    }
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -191,6 +197,7 @@ struct ArchiveReducer {
                         await send(.sharedContentsResponse(.failure(error)))
                     }
                 }
+                .cancellable(id: CancelID.sharedContentsRequest, cancelInFlight: true)
 
             case .sharedContentsResponse(.success(let cards)):
                 state.sharedContents = cards.enumerated().map { index, card in
@@ -202,6 +209,46 @@ struct ArchiveReducer {
             case .sharedContentsResponse(.failure(let error)):
                 state.isSharedContentsLoading = false
                 print("[ArchiveReducer] fetchSharedContents error: \(error.localizedDescription)")
+                return .none
+
+            case .sharedContentOpened(let exposureContentID):
+                guard let userId = UserInfo.userId else { return .none }
+                state.selectedSection = .shared
+                state.isSharedContentsLoading = true
+                return .run { send in
+                    do {
+                        try await sharedContentClient.updateSharedContent(
+                            UpdateSharedContentRequestDTO(
+                                userId: userId,
+                                exposureContentId: exposureContentID,
+                                isShared: true
+                            )
+                        )
+                        let cards = try await sharedContentClient.fetchSharedContents(
+                            FetchSharedContentsRequestDTO(userId: userId)
+                        )
+                        await send(.sharedContentOpenedResponse(.success(cards), exposureContentID: exposureContentID))
+                    } catch {
+                        await send(.sharedContentOpenedResponse(.failure(error), exposureContentID: exposureContentID))
+                    }
+                }
+                .cancellable(id: CancelID.sharedContentsRequest, cancelInFlight: true)
+
+            case .sharedContentOpenedResponse(.success(let cards), let exposureContentID):
+                state.sharedContents = cards.enumerated().map { index, card in
+                    ArchiveNewsletter(card: card, color: ArchiveCardColor.color(for: index))
+                }
+                state.isSharedContentsLoading = false
+                guard let content = state.sharedContents.first(where: { $0.id == exposureContentID }) else {
+                    print("[ArchiveReducer] shared content not found: \(exposureContentID)")
+                    return .none
+                }
+                state.selectedContent = content
+                return .send(.delegate(.presentArchiveCard))
+
+            case .sharedContentOpenedResponse(.failure(let error), _):
+                state.isSharedContentsLoading = false
+                print("[ArchiveReducer] open shared content error: \(error.localizedDescription)")
                 return .none
 
             case .sectionSelected(let section):

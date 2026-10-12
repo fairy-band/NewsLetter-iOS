@@ -51,6 +51,7 @@ struct HomeReducer {
         case settingPressed
         case submitNewsletterReport(NewsletterReportRequestDTO)
         case setIsPresentReportSuccessToast(Bool)
+        case openSharedContent(Int)
     }
     
     @Dependency(\.newsletterReportClient) var newsletterReportClient
@@ -97,6 +98,9 @@ struct HomeReducer {
             case .archive(.delegate(.presentArchiveCard)):
                 state.isPresentArchiveCard = true
                 return .none
+            case .openSharedContent(let exposureContentID):
+                state.selectedTab = .archive
+                return .send(.archive(.sharedContentOpened(exposureContentID)))
             case .settingPressed:
                 state.recommendPath.append(.setting(SettingReducer.State()))
                 return .none

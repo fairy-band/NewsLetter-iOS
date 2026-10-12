@@ -17,6 +17,12 @@ struct FetchSharedContentsRequestDTO {
     }
 }
 
+struct UpdateSharedContentRequestDTO: Encodable {
+    let userId: Int
+    let exposureContentId: Int
+    let isShared: Bool
+}
+
 struct SharedContentListResponseDTO: Decodable {
     let sharedContents: [SharedContentCardDTO]
 
