@@ -55,19 +55,6 @@ struct AppView: View {
             if case let .forced(_, message) = store.updateStatus { Text(message) }
             else if case let .optional(_, message) = store.updateStatus { Text(message) }
         }
-        .fullScreenCover(
-            item: $store.sharedContent.sending(\.setSharedContent)
-        ) { content in
-            MarkdownDetailView(
-                exposureContentId: content.id,
-                contentURL: content.contentURL,
-                pointColor: Color(UIColor(hexCode: content.colorHex)),
-                isPresented: Binding(
-                    get: { store.sharedContent != nil },
-                    set: { if !$0 { store.send(.setSharedContent(nil)) } }
-                )
-            )
-        }
     }
 
     @ViewBuilder

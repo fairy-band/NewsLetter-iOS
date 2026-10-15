@@ -31,7 +31,7 @@ final class KakaoShareManager: ObservableObject {
             return
         }
 
-        // 공유받은 사람이 앱으로 진입하면 AppReducer가 이 값으로 마크다운 상세를 띄운다
+        // 공유받은 사람이 앱으로 진입하면 보관함의 공유받은 콘텐츠를 연다.
         let executionParams = [
             "exposureContentId": "\(id)",
             "contentURL": contentURL,

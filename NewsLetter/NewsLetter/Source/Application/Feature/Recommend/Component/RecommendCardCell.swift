@@ -60,6 +60,7 @@ struct RecommendCardCell: View {
                     Text(props.job)
                         .font(.body13_medium)
                         .foregroundStyle(ColorPalette.gray950.opacity(0.5))
+                        .lineLimit(1)
                         .padding(.trailing, 6)
                     Rectangle()
                         .frame(width: 1, height: 14)

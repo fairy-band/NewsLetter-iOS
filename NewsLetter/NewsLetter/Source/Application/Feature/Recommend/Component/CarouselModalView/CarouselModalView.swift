@@ -44,7 +44,14 @@ struct CarouselModalView: View {
                             let card = cardData[index]
                             let pointColor = pointColors[index]
                             let cardType = index == cardData.count - 1 ? "trending" : "recommend"
-                    CarouselCard(card: card, index: index, pointColor: pointColor, isShareEnabled: true, cardType: cardType)
+                            CarouselCard(
+                                card: card,
+                                index: index,
+                                pointColor: pointColor,
+                                isShareEnabled: true,
+                                isDetailAnalyticsEnabled: true,
+                                cardType: cardType
+                            )
                                 .frame(width: Metric.cardWidth)
                         }
                     }

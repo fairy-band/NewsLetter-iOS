@@ -22,6 +22,8 @@ struct SingleModalView: View {
     let cardData: Card
     let pointColor: Color
     let firstLookHandler: () -> Void
+    let isBookmarked: Bool
+    let bookmarkTapHandler: () -> Void
     
     var body: some View {
         ZStack {
@@ -38,7 +40,10 @@ struct SingleModalView: View {
                     index: index,
                     pointColor: pointColor,
                     isShareEnabled: true,
-                    cardType: index == 0 ? "trending" : "recommend"
+                    isDetailAnalyticsEnabled: true,
+                    cardType: index == 0 ? "trending" : "recommend",
+                    isBookmarked: isBookmarked,
+                    bookmarkTapHandler: bookmarkTapHandler
                 )
                 .frame(width: Metric.cardWidth, height: Metric.cardHeight)
 
@@ -75,6 +80,8 @@ struct SingleModalView: View {
         index: 0,
         cardData: .stub(),
         pointColor: ColorPalette.pointOrange500,
-        firstLookHandler: {}
+        firstLookHandler: {},
+        isBookmarked: false,
+        bookmarkTapHandler: {}
     )
 }
