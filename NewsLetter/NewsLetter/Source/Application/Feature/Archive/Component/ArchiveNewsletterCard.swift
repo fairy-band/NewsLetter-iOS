@@ -23,16 +23,9 @@ struct ArchiveNewsletterCard: View {
 
                     Spacer(minLength: 0)
 
-                    HStack(spacing: 8) {
-                        Text(content.keyword)
-                            .lineLimit(1)
-                        Rectangle()
-                            .fill(ColorPalette.gray950.opacity(0.1))
-                            .frame(width: 1, height: 14)
-                        Text(content.newsletterName)
-                            .lineLimit(1)
-                    }
-                    .font(.body13_regular)
+                    Text(content.keyword)
+                        .lineLimit(1)
+                        .font(.body13_regular)
                     .foregroundStyle(ColorPalette.gray950.opacity(0.5))
                 }
                 .padding(16)

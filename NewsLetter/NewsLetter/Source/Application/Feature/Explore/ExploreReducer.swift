@@ -111,11 +111,8 @@ struct ExploreReducer {
                     state.selectedCategories.removeAll()
                     return .send(.fetchFirstPage)
                 }
-                if state.selectedCategories.contains(preference) {
-                    state.selectedCategories.remove(preference)
-                } else {
-                    state.selectedCategories.insert(preference)
-                }
+                // 직군은 단일 선택. 선택된 칩을 다시 누르면 전체로 돌아갑니다
+                state.selectedCategories = state.selectedCategories.contains(preference) ? [] : [preference]
                 return .send(.fetchFirstPage)
             case .setSortDirection(let sortDirection):
                 state.sortDirection = sortDirection
