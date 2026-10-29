@@ -15,7 +15,10 @@ struct Card: Codable {
     let newsletterName: String
     let language: String
     let kind: Kind
-    
+    var categoryName: String? = nil
+
+    var category: ContentCategory? { categoryName.flatMap(ContentCategory.init(rawValue:)) }
+
     enum Kind: String, Codable {
         case news
         case blog
@@ -54,4 +57,14 @@ struct Card: Codable {
             kind: kind
         )
     }
+}
+
+// 콘텐츠 대표 직군 카테고리 (서버 categoryName 값)
+enum ContentCategory: String {
+    case backend = "BE"
+    case frontend = "FE"
+    case iOS = "iOS"
+    case android = "Android"
+    case devops = "DevOps"
+    case ai = "AI"
 }
