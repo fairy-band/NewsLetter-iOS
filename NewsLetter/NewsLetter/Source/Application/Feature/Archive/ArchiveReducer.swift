@@ -32,8 +32,17 @@ enum ArchiveCardColor: CaseIterable {
         .blue, .lemonYellow, .purple, .mint, .pink, .orange, .green
     ]
 
-    static func color(for index: Int) -> ArchiveCardColor {
-        rotation[index % rotation.count]
+    // 카테고리가 없거나 알 수 없는 카드는 기존 순환 색상을 사용합니다
+    static func color(for card: Card, index: Int) -> ArchiveCardColor {
+        switch card.category {
+        case .backend:  return .purple
+        case .frontend: return .mint
+        case .iOS:      return .pink
+        case .android:  return .green
+        case .devops:   return .blue
+        case .ai:       return .lemonYellow
+        case nil:       return rotation[index % rotation.count]
+        }
     }
 
     var color: Color {
@@ -175,7 +184,7 @@ struct ArchiveReducer {
 
             case .savedContentsResponse(.success(let cards)):
                 state.savedContents = cards.enumerated().map { index, card in
-                    ArchiveNewsletter(card: card, color: ArchiveCardColor.color(for: index))
+                    ArchiveNewsletter(card: card, color: ArchiveCardColor.color(for: card, index: index))
                 }
                 state.isSavedContentsLoading = false
                 return .none
@@ -201,7 +210,7 @@ struct ArchiveReducer {
 
             case .sharedContentsResponse(.success(let cards)):
                 state.sharedContents = cards.enumerated().map { index, card in
-                    ArchiveNewsletter(card: card, color: ArchiveCardColor.color(for: index))
+                    ArchiveNewsletter(card: card, color: ArchiveCardColor.color(for: card, index: index))
                 }
                 state.isSharedContentsLoading = false
                 return .none
@@ -236,7 +245,7 @@ struct ArchiveReducer {
 
             case .sharedContentOpenedResponse(.success(let cards), let exposureContentID):
                 state.sharedContents = cards.enumerated().map { index, card in
-                    ArchiveNewsletter(card: card, color: ArchiveCardColor.color(for: index))
+                    ArchiveNewsletter(card: card, color: ArchiveCardColor.color(for: card, index: index))
                 }
                 state.isSharedContentsLoading = false
                 guard let content = state.sharedContents.first(where: { $0.id == exposureContentID }) else {
@@ -265,7 +274,7 @@ struct ArchiveReducer {
                     state.savedContents.append(
                         ArchiveNewsletter(
                             card: card,
-                            color: ArchiveCardColor.color(for: state.savedContents.count)
+                            color: ArchiveCardColor.color(for: card, index: state.savedContents.count)
                         )
                     )
                 }

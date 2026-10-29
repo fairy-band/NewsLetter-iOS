@@ -14,6 +14,7 @@ enum ColorPaletteName: String, Codable, CaseIterable {
     case pointPurple150, pointPurple200, pointPurple300
     case pointGreen200, pointGreen300, pointGreen400
     case pointLemonYellow200, pointLemonYellow300, pointLemonYellow400
+    case pointMint300
 
     var color: Color {
         switch self {
@@ -40,6 +41,8 @@ enum ColorPaletteName: String, Codable, CaseIterable {
         case .pointLemonYellow200: return ColorPalette.pointLemonYellow200
         case .pointLemonYellow300: return ColorPalette.pointLemonYellow300
         case .pointLemonYellow400: return ColorPalette.pointLemonYellow400
+
+        case .pointMint300: return ColorPalette.pointMint300
         }
     }
 

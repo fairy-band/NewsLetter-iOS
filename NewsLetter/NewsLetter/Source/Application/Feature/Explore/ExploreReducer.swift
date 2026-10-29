@@ -23,6 +23,19 @@ private extension Preference {
     }
 }
 
+extension ContentCategory {
+    var explorePaletteName: ColorPaletteName {
+        switch self {
+        case .backend:  return .pointPurple300
+        case .frontend: return .pointMint300
+        case .iOS:      return .pointPink300
+        case .android:  return .pointGreen300
+        case .devops:   return .pointBlue300
+        case .ai:       return .pointLemonYellow300
+        }
+    }
+}
+
 @Reducer
 struct ExploreReducer {
     @ObservableState
@@ -41,6 +54,11 @@ struct ExploreReducer {
         var totalCount: Int = 0
         var isLoading: Bool = false
         var isPresentToast: Bool = false
+
+        // 카테고리가 없거나 알 수 없는 카드는 기존 순환 색상을 사용합니다
+        func cardColor(at index: Int) -> ColorPaletteName {
+            data[index].category?.explorePaletteName ?? colorList[index % colorList.count]
+        }
     }
     
     enum Action {
