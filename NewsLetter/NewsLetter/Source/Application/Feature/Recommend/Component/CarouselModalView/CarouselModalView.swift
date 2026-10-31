@@ -138,6 +138,9 @@ extension Color {
         case ColorPalette.pointMint300:
             return ColorPalette.pointMint600
 
+        case ColorPalette.gray150:
+            return ColorPalette.gray600
+
         default:
             return self
         }

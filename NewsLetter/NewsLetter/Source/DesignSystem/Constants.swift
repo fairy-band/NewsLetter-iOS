@@ -43,10 +43,8 @@ extension ContentCategory {
 }
 
 extension [Card] {
-    // 카테고리가 없거나 알 수 없는 카드는 기존 순환 색상을 사용합니다
+    // 카테고리가 없거나 알 수 없는 카드는 회색을 사용합니다
     var colorSet: [ColorSet] {
-        enumerated().map { index, card in
-            card.category?.colorSet ?? defaultColorSet[index % defaultColorSet.count]
-        }
+        map { $0.category?.colorSet ?? (ColorPalette.gray150, ColorPalette.gray600) }
     }
 }

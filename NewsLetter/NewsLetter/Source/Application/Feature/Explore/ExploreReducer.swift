@@ -40,11 +40,6 @@ extension ContentCategory {
 struct ExploreReducer {
     @ObservableState
     struct State {
-        var colorList: [ColorPaletteName] = [
-            .pointGreen300, .pointPink300,
-            .pointLemonYellow300, .pointBlue300,
-            .pointOrange300, .pointPurple300
-        ]
         var data: [ExploreCard] = []
         var sortDirection: SortDirection = .desc
         var selectedCard: (Card, ColorPaletteName)? = nil
@@ -55,9 +50,9 @@ struct ExploreReducer {
         var isLoading: Bool = false
         var isPresentToast: Bool = false
 
-        // 카테고리가 없거나 알 수 없는 카드는 기존 순환 색상을 사용합니다
+        // 카테고리가 없거나 알 수 없는 카드는 회색을 사용합니다
         func cardColor(at index: Int) -> ColorPaletteName {
-            data[index].category?.explorePaletteName ?? colorList[index % colorList.count]
+            data[index].category?.explorePaletteName ?? .gray150
         }
     }
     
