@@ -86,9 +86,8 @@ struct ExploreView: View {
                     ScrollView(showsIndicators: true) {
                         LazyVGrid(columns: columns, spacing: Metrics.gridSpacing) {
                             ForEach(store.state.data.indices, id: \.self) { index in
-                                let colorIndex = index % store.state.colorList.count
                                 let data = store.state.data[index]
-                                let colorPallete = store.state.colorList[colorIndex]
+                                let colorPallete = store.state.cardColor(at: index)
                                 let isLastItem = index == store.state.data.count - 1
                                 
                                 ExploreCardCell(

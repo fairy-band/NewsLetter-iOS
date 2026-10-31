@@ -29,8 +29,22 @@ let defaultColorSet: [ColorSet] = [
     (ColorPalette.pointOrange400, ColorPalette.pointOrangeTextPrimary),
 ]
 
+extension ContentCategory {
+    var colorSet: ColorSet {
+        switch self {
+        case .backend:  return (ColorPalette.pointPurple200, ColorPalette.pointPurpleTextPrimary)
+        case .frontend: return (ColorPalette.pointMint500, ColorPalette.pointMintTextPrimary)
+        case .iOS:      return (ColorPalette.pointPink300, ColorPalette.pointPinkTextPrimary)
+        case .android:  return (ColorPalette.pointGreen300, ColorPalette.pointGreenTextPrimary)
+        case .devops:   return (ColorPalette.pointBlue300, ColorPalette.pointBlueTextPrimary)
+        case .ai:       return (ColorPalette.pointLemonYellow300, ColorPalette.pointLemonYellowTextPrimary)
+        }
+    }
+}
+
 extension [Card] {
+    // 카테고리가 없거나 알 수 없는 카드는 회색을 사용합니다
     var colorSet: [ColorSet] {
-        defaultColorSet
+        map { $0.category?.colorSet ?? (ColorPalette.gray150, ColorPalette.gray600) }
     }
 }

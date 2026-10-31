@@ -23,15 +23,23 @@ private extension Preference {
     }
 }
 
+extension ContentCategory {
+    var explorePaletteName: ColorPaletteName {
+        switch self {
+        case .backend:  return .pointPurple300
+        case .frontend: return .pointMint300
+        case .iOS:      return .pointPink300
+        case .android:  return .pointGreen300
+        case .devops:   return .pointBlue300
+        case .ai:       return .pointLemonYellow300
+        }
+    }
+}
+
 @Reducer
 struct ExploreReducer {
     @ObservableState
     struct State {
-        var colorList: [ColorPaletteName] = [
-            .pointGreen300, .pointPink300,
-            .pointLemonYellow300, .pointBlue300,
-            .pointOrange300, .pointPurple300
-        ]
         var data: [ExploreCard] = []
         var sortDirection: SortDirection = .desc
         var selectedCard: (Card, ColorPaletteName)? = nil
@@ -41,6 +49,11 @@ struct ExploreReducer {
         var totalCount: Int = 0
         var isLoading: Bool = false
         var isPresentToast: Bool = false
+
+        // 카테고리가 없거나 알 수 없는 카드는 회색을 사용합니다
+        func cardColor(at index: Int) -> ColorPaletteName {
+            data[index].category?.explorePaletteName ?? .gray150
+        }
     }
     
     enum Action {
@@ -111,11 +124,8 @@ struct ExploreReducer {
                     state.selectedCategories.removeAll()
                     return .send(.fetchFirstPage)
                 }
-                if state.selectedCategories.contains(preference) {
-                    state.selectedCategories.remove(preference)
-                } else {
-                    state.selectedCategories.insert(preference)
-                }
+                // 직군은 단일 선택. 선택된 칩을 다시 누르면 전체로 돌아갑니다
+                state.selectedCategories = state.selectedCategories.contains(preference) ? [] : [preference]
                 return .send(.fetchFirstPage)
             case .setSortDirection(let sortDirection):
                 state.sortDirection = sortDirection
