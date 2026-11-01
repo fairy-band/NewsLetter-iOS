@@ -196,7 +196,9 @@ platform :ios do
       submit_for_review:  false,
       automatic_release:  false,
       skip_screenshots:   true,
-      force:              true
+      force:              true,
+      # API Key 로그인은 precheck의 인앱 결제 검사를 지원하지 않아 업로드 후 실패합니다
+      run_precheck_before_submit: false
     )
     clean_build_artifacts
   end
