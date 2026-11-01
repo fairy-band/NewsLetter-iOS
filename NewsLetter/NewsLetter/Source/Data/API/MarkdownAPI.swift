@@ -10,7 +10,7 @@ import Foundation
 import Moya
 
 enum MarkdownAPI {
-    case fetchMarkdown(exposureContentId: Int)
+    case fetchMarkdown(exposureContentId: Int, userId: Int)
 }
 
 extension MarkdownAPI: TargetType {
@@ -20,7 +20,7 @@ extension MarkdownAPI: TargetType {
 
     var path: String {
         switch self {
-        case .fetchMarkdown(let exposureContentId):
+        case .fetchMarkdown(let exposureContentId, _):
             return "/api/newsletters/exposure-contents/\(exposureContentId)/markdown"
         }
     }
@@ -30,7 +30,13 @@ extension MarkdownAPI: TargetType {
     }
 
     var task: Task {
-        return .requestPlain
+        switch self {
+        case .fetchMarkdown(_, let userId):
+            return .requestParameters(
+                parameters: ["userId": userId],
+                encoding: URLEncoding.queryString
+            )
+        }
     }
 
     var headers: [String: String]? {

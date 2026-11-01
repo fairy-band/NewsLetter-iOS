@@ -30,6 +30,9 @@ struct AppView: View {
         .onAppear {
             store.send(.onAppear)
         }
+        .onOpenURL { url in
+            store.send(.openURL(url))
+        }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 store.send(.onSceneActive)

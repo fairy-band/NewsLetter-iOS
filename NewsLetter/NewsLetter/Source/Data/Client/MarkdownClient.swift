@@ -14,7 +14,7 @@ struct MarkdownClient {
     static let apiClient = MoyaAPIClient()
 
     /// 노출 콘텐츠의 마크다운 본문을 조회한다
-    var fetchMarkdown: (_ exposureContentId: Int) async throws -> String
+    var fetchMarkdown: (_ exposureContentId: Int, _ userId: Int) async throws -> String
 }
 
 extension DependencyValues {
@@ -27,9 +27,9 @@ extension DependencyValues {
 extension MarkdownClient: DependencyKey {
     static var liveValue: MarkdownClient = {
         MarkdownClient(
-            fetchMarkdown: { exposureContentId in
+            fetchMarkdown: { exposureContentId, userId in
                 let response = try await apiClient.request(
-                    MarkdownAPI.fetchMarkdown(exposureContentId: exposureContentId)
+                    MarkdownAPI.fetchMarkdown(exposureContentId: exposureContentId, userId: userId)
                 )
                 return try response.map(MarkdownResponseDTO.self)
                     .markdownContent
@@ -40,7 +40,7 @@ extension MarkdownClient: DependencyKey {
 
     static var previewValue: MarkdownClient = {
         MarkdownClient(
-            fetchMarkdown: { _ in
+            fetchMarkdown: { _, _ in
                 """
                 ## 프리뷰 마크다운
 

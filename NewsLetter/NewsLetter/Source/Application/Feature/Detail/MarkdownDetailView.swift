@@ -19,17 +19,28 @@ struct MarkdownDetailView: View {
     let contentURL: String
     let pointColor: Color
     @Binding var isPresented: Bool
+    let isBookmarked: Bool
+    let bookmarkTapHandler: () -> Void
 
     @State private var isLinkCopiedToastPresented: Bool = false
 
-    init(exposureContentId: Int, contentURL: String, pointColor: Color, isPresented: Binding<Bool>) {
+    init(
+        exposureContentId: Int,
+        contentURL: String,
+        pointColor: Color,
+        isPresented: Binding<Bool>,
+        isBookmarked: Bool = false,
+        bookmarkTapHandler: @escaping () -> Void = {}
+    ) {
         self.init(
             store: Store(initialState: MarkdownDetailReducer.State(exposureContentId: exposureContentId)) {
                 MarkdownDetailReducer()
             },
             contentURL: contentURL,
             pointColor: pointColor,
-            isPresented: isPresented
+            isPresented: isPresented,
+            isBookmarked: isBookmarked,
+            bookmarkTapHandler: bookmarkTapHandler
         )
     }
 
@@ -37,12 +48,16 @@ struct MarkdownDetailView: View {
         store: StoreOf<MarkdownDetailReducer>,
         contentURL: String,
         pointColor: Color,
-        isPresented: Binding<Bool>
+        isPresented: Binding<Bool>,
+        isBookmarked: Bool = false,
+        bookmarkTapHandler: @escaping () -> Void = {}
     ) {
         self._store = State(initialValue: store)
         self.contentURL = contentURL
         self.pointColor = pointColor
         self._isPresented = isPresented
+        self.isBookmarked = isBookmarked
+        self.bookmarkTapHandler = bookmarkTapHandler
     }
 
     private var nodes: [MarkdownNode] {
@@ -164,6 +179,17 @@ struct MarkdownDetailView: View {
                 }
 
                 Spacer()
+
+                Button(action: bookmarkTapHandler) {
+                    Image(isBookmarked ? "bookmark_icon_selected" : "bookmark_icon")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 22)
+                        .foregroundStyle(navTitleColor)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isBookmarked ? "저장 해제" : "저장")
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 14)

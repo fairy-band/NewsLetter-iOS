@@ -43,9 +43,13 @@ struct MarkdownDetailReducer {
             case .onAppear:
                 // 이미 본문을 받아온 뒤 화면이 다시 나타나면 재요청하지 않는다
                 guard state.loadState == .loading else { return .none }
-                return .run { [exposureContentId = state.exposureContentId] send in
+                guard let userId = UserInfo.userId else {
+                    state.loadState = .failed
+                    return .none
+                }
+                return .run { [exposureContentId = state.exposureContentId, userId] send in
                     do {
-                        let markdown = try await markdownClient.fetchMarkdown(exposureContentId)
+                        let markdown = try await markdownClient.fetchMarkdown(exposureContentId, userId)
                         await send(.markdownLoaded(markdown))
                     } catch {
                         // 어떤 콘텐츠의 마크다운이 비어있는지 확인할 수 있도록 id를 남긴다

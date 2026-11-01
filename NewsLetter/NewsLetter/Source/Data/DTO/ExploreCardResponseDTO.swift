@@ -33,6 +33,7 @@ struct ExploreCardDTO: Decodable {
     let language: String
     let createdAt: String
     let updatedAt: String
+    let categoryName: String?
 
     enum CodingKeys: String, CodingKey {
         case id, contentId
@@ -41,6 +42,7 @@ struct ExploreCardDTO: Decodable {
         case newsletterName
         case language
         case createdAt, updatedAt
+        case categoryName
     }
     
     func toDomain() -> ExploreCard {
@@ -51,7 +53,8 @@ struct ExploreCardDTO: Decodable {
             summary: summaryContent,
             newsletterName: newsletterName,
             language: language,
-            contentURL: contentURL
+            contentURL: contentURL,
+            categoryName: categoryName
         )
     }
 }
