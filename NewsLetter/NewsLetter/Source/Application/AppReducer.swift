@@ -82,14 +82,7 @@ struct AppReducer {
                 return .none
 
             case let .openURL(url):
-                guard ShareApi.isKakaoTalkSharingUrl(url) else { return .none }
-                let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
-                guard let sharedContentID = queryItems
-                    .first(where: { $0.name == "exposureContentId" })?
-                    .value
-                    .flatMap(Int.init) else {
-                    return .none
-                }
+                guard let sharedContentID = Self.sharedContentID(from: url) else { return .none }
 
                 guard state.isRemoteConfigResolved else {
                     state.pendingSharedContentID = sharedContentID
@@ -105,6 +98,23 @@ struct AppReducer {
                 return .none
             }
         }
+    }
+
+    /// 카카오톡 공유 링크(exposureContentId 쿼리) 또는 Universal Link(https://<BASE_URL 호스트>/share/{id})에서 콘텐츠 ID를 꺼냅니다
+    static func sharedContentID(from url: URL) -> Int? {
+        if ShareApi.isKakaoTalkSharingUrl(url) {
+            return URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?
+                .first(where: { $0.name == "exposureContentId" })?
+                .value
+                .flatMap(Int.init)
+        }
+        let components = url.pathComponents  // ["/", "share", "{id}"]
+        guard url.scheme == "https",
+              url.host == URL(string: AppInfo.baseURL)?.host,
+              components.count == 3,
+              components[1] == "share" else { return nil }
+        return Int(components[2])
     }
 
     private func openPendingSharedContent(_ state: inout State) -> Effect<Action> {
