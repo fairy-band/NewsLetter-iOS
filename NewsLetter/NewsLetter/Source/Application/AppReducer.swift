@@ -100,7 +100,7 @@ struct AppReducer {
         }
     }
 
-    /// 카카오톡 공유 링크(exposureContentId 쿼리) 또는 Universal Link(https://<BASE_URL 호스트>/share/{id})에서 콘텐츠 ID를 꺼냅니다
+    /// 카카오톡 공유 링크(exposureContentId 쿼리) 또는 Universal Link(https://<universalLinkHost>/share/{id})에서 콘텐츠 ID를 꺼냅니다
     static func sharedContentID(from url: URL) -> Int? {
         if ShareApi.isKakaoTalkSharingUrl(url) {
             return URLComponents(url: url, resolvingAgainstBaseURL: false)?
@@ -111,7 +111,7 @@ struct AppReducer {
         }
         let components = url.pathComponents  // ["/", "share", "{id}"]
         guard url.scheme == "https",
-              url.host == URL(string: AppInfo.baseURL)?.host,
+              url.host == AppInfo.universalLinkHost,
               components.count == 3,
               components[1] == "share" else { return nil }
         return Int(components[2])

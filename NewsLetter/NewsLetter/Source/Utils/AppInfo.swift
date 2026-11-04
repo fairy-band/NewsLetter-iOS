@@ -20,6 +20,9 @@ struct AppInfo {
         Bundle.main.infoDictionary?["BASE_URL"] as? String ?? "fairy-band.com"
     }
     
+    /// Universal Link 도메인 — NewsLetter.entitlements의 applinks 값과 같아야 합니다
+    static let universalLinkHost = "soak-app.duckdns.org"
+
     static func value(forKey key: String) -> String? {
         Bundle.main.infoDictionary?[key] as? String
     }
