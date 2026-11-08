@@ -100,7 +100,8 @@ struct AppReducer {
         }
     }
 
-    /// 카카오톡 공유 링크(exposureContentId 쿼리) 또는 Universal Link(https://<universalLinkHost>/share/{id})에서 콘텐츠 ID를 꺼냅니다
+    /// 카카오톡 공유 링크(exposureContentId 쿼리), 커스텀 스킴(soak://share/{id}),
+    /// Universal Link(https://<universalLinkHost>/share/{id})에서 콘텐츠 ID를 꺼냅니다
     static func sharedContentID(from url: URL) -> Int? {
         if ShareApi.isKakaoTalkSharingUrl(url) {
             return URLComponents(url: url, resolvingAgainstBaseURL: false)?
@@ -108,6 +109,11 @@ struct AppReducer {
                 .first(where: { $0.name == "exposureContentId" })?
                 .value
                 .flatMap(Int.init)
+        }
+        // 웹의 '앱으로 열기' 버튼: soak://share/{id} → host "share", pathComponents ["/", "{id}"]
+        if url.scheme == "soak" {
+            guard url.host == "share", url.pathComponents.count == 2 else { return nil }
+            return Int(url.pathComponents[1])
         }
         let components = url.pathComponents  // ["/", "share", "{id}"]
         guard url.scheme == "https",
