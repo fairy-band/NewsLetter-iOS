@@ -23,16 +23,9 @@ struct ArchiveNewsletterCard: View {
 
                     Spacer(minLength: 0)
 
-                    HStack(spacing: 8) {
-                        Text(content.keyword)
-                            .lineLimit(1)
-                        Rectangle()
-                            .fill(ColorPalette.gray950.opacity(0.1))
-                            .frame(width: 1, height: 14)
-                        Text(content.newsletterName)
-                            .lineLimit(1)
-                    }
-                    .font(.body13_regular)
+                    Text(content.keyword)
+                        .lineLimit(1)
+                        .font(.body13_regular)
                     .foregroundStyle(ColorPalette.gray950.opacity(0.5))
                 }
                 .padding(16)
@@ -58,7 +51,7 @@ struct ArchiveNewsletterCard: View {
             }
         }
         .frame(maxWidth: .infinity, minHeight: 112, maxHeight: 112, alignment: .leading)
-        .background(content.categoryTheme.cardBackgroundColor)
+        .background(content.color.color)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
@@ -70,7 +63,7 @@ struct ArchiveNewsletterCard: View {
             title: "네온, PostgreSQL 전문가도\n놓친 치명적 실수",
             keyword: "PostgreSQL",
             newsletterName: "데브 위클리",
-            categoryTheme: .backend
+            color: .blue
         ),
         showsBookmark: true,
         bookmarkTapHandler: {},

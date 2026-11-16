@@ -33,6 +33,10 @@ struct AppView: View {
         .onOpenURL { url in
             store.send(.openURL(url))
         }
+        .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+            guard let url = activity.webpageURL else { return }
+            store.send(.openURL(url))
+        }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 store.send(.onSceneActive)

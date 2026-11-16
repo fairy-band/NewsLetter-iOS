@@ -7,11 +7,18 @@ enum SharedContentLink {
 
     static func contentID(from url: URL) -> Int? {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              components.scheme?.lowercased() == "soak",
-              components.host?.lowercased() == "contents",
               components.user == nil,
               components.password == nil,
               components.port == nil else { return nil }
+
+        switch components.scheme?.lowercased() {
+        case "soak":
+            guard components.host?.lowercased() == "contents" else { return nil }
+        case "https":
+            guard components.host?.lowercased() == AppInfo.universalLinkHost else { return nil }
+        default:
+            return nil
+        }
 
         let path = components.path.components(separatedBy: "/")
         guard path.count == 3,

@@ -13,6 +13,9 @@ struct ExploreCard: Codable {
     let newsletterName: String
     let language: String
     let contentURL: String
+    var categoryName: String? = nil
+
+    var category: ContentCategory? { categoryName.flatMap(ContentCategory.init(rawValue:)) }
 
     static func stub(
         id: Int = 1,
@@ -44,7 +47,8 @@ struct ExploreCard: Codable {
             imageURL: nil,
             newsletterName: newsletterName,
             language: language,
-            kind: .blog // FIXME: 탐색카드에서 CardType 기획 필요
+            kind: .blog, // FIXME: 탐색카드에서 CardType 기획 필요
+            categoryName: categoryName
         )
     }
 }

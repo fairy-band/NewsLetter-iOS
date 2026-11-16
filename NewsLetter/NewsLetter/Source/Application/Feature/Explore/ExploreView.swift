@@ -87,25 +87,23 @@ struct ExploreView: View {
                         LazyVGrid(columns: columns, spacing: Metrics.gridSpacing) {
                             ForEach(store.state.data.indices, id: \.self) { index in
                                 let data = store.state.data[index]
-                                let card = data.toCard()
-                                let categoryTheme = store.state.selectedCategories.count == 1
-                                    ? ContentCategoryTheme(preference: store.state.selectedCategories.first!)
-                                    : card.categoryTheme
+                                let colorPallete = store.state.cardColor(at: index)
                                 let isLastItem = index == store.state.data.count - 1
                                 
                                 ExploreCardCell(
                                     data: data,
-                                    color: categoryTheme.cardBackgroundColor
+                                    color: colorPallete.color
                                 )
                                 .frame(height: Metrics.cardHeight)
                                 .onTapGesture {
+                                    let card = data.toCard()
                                     GA.explore_contents_detail_pageview(
                                         cardIndex: index,
                                         contentType: card.kind.gaContentType,
                                         contentTitle: card.title,
                                         contentId: card.id
                                     )
-                                    store.send(.setSelectedCard((card, categoryTheme)))
+                                    store.send(.setSelectedCard((card, colorPallete)))
 
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                         store.send(.delegate(.presentExploreCard))

@@ -12,20 +12,6 @@ struct UserInfo {
     @UserDefaultWrapper(key: "userId", defaultValue: nil)
     static var userId: Int?
 
-    /// 북마크를 저장한 화면의 카테고리를 계정·콘텐츠별로 유지합니다.
-    @UserDefaultWrapper(key: "bookmarkCategoryThemes", defaultValue: [:])
-    private static var bookmarkCategoryThemes: [String: ContentCategoryTheme]
-
-    static func bookmarkCategoryTheme(for contentID: Int) -> ContentCategoryTheme? {
-        guard let userId else { return nil }
-        return bookmarkCategoryThemes["\(userId):\(contentID)"]
-    }
-
-    static func setBookmarkCategoryTheme(_ theme: ContentCategoryTheme?, for contentID: Int) {
-        guard let userId else { return }
-        bookmarkCategoryThemes["\(userId):\(contentID)"] = theme
-    }
-
     /// 유저의 카드 정보(하루에 1번 갱신)
     @UserDefaultWrapper(key: "cachedDailyCards", defaultValue: nil)
     static var cachedDailyCards: [Card]?

@@ -98,16 +98,16 @@ struct HomeView: View {
             }
         }
         .overlay {
-            if store.isPresentExploreCard, let (card, categoryTheme) = store.exploreState.selectedCard {
+            if store.isPresentExploreCard, let (card, colorPaletteName) = store.exploreState.selectedCard {
                 ExploreCardModalView(
                     isPresented: $store.isPresentExploreCard,
                     cardData: card,
-                    pointColor: categoryTheme.detailColor,
+                    pointColor: colorPaletteName.color.toChangeColor(),
                     isDetailAnalyticsEnabled: true,
                     isExploreDetailAnalytics: true,
                     isShareEnabled: true,
                     isBookmarked: isBookmarked(card),
-                    bookmarkTapHandler: { toggleBookmark(card, categoryTheme: categoryTheme) }
+                    bookmarkTapHandler: { toggleBookmark(card) }
                 )
                 .frame(width: Device.width)
                 .transition(.opacity)
@@ -120,12 +120,12 @@ struct HomeView: View {
                 ExploreCardModalView(
                     isPresented: $store.isPresentArchiveCard,
                     cardData: content.card,
-                    pointColor: content.categoryTheme.detailColor,
+                    pointColor: content.color.color.toChangeColor(),
                     isDetailAnalyticsEnabled: false,
                     isExploreDetailAnalytics: false,
                     isShareEnabled: true,
                     isBookmarked: isBookmarked(content.card),
-                    bookmarkTapHandler: { toggleBookmark(content.card, categoryTheme: content.categoryTheme) }
+                    bookmarkTapHandler: { toggleBookmark(content.card) }
                 )
                 .frame(width: Device.width)
                 .transition(.opacity)
@@ -213,8 +213,8 @@ struct HomeView: View {
         store.archiveState.savedContents.contains { $0.id == card.id }
     }
 
-    private func toggleBookmark(_ card: Card, categoryTheme: ContentCategoryTheme? = nil) {
-        store.send(.archive(.bookmarkToggled(card, categoryTheme: categoryTheme)))
+    private func toggleBookmark(_ card: Card) {
+        store.send(.archive(.bookmarkToggled(card)))
     }
 
     private func onboardingJobDetailBottomSheetConfirmHandler(

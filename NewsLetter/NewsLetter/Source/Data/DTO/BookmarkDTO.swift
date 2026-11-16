@@ -40,13 +40,14 @@ struct BookmarkCardDTO: Decodable {
     let imageURL: String?
     let newsletterName: String
     let language: String
+    let categoryName: String?
 
     enum CodingKeys: String, CodingKey {
         case exposureContentId
         case provocativeKeyword, provocativeHeadline, summaryContent
         case contentURL = "contentUrl"
         case imageURL = "imageUrl"
-        case newsletterName, language
+        case newsletterName, language, categoryName
     }
 
     func toDomain() -> Card {
@@ -59,7 +60,8 @@ struct BookmarkCardDTO: Decodable {
             imageURL: imageURL,
             newsletterName: newsletterName,
             language: language,
-            kind: .blog
+            kind: .blog,
+            categoryName: categoryName
         )
     }
 }

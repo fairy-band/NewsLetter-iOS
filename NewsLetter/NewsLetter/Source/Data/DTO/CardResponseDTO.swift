@@ -31,6 +31,7 @@ struct CardDTO: Decodable {
     let newsletterName: String
     let language: String
     let cardType: CardType
+    let categoryName: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -40,6 +41,7 @@ struct CardDTO: Decodable {
         case newsletterName
         case language
         case cardType
+        case categoryName
     }
     
     func toDomain() -> Card {
@@ -52,7 +54,8 @@ struct CardDTO: Decodable {
             imageURL: imageURL,
             newsletterName: newsletterName,
             language: language,
-            kind: cardType.toDomain()
+            kind: cardType.toDomain(),
+            categoryName: categoryName
         )
     }
 }
