@@ -110,7 +110,7 @@ struct ExploreReducer {
                 if state.selectedCategories.contains(preference) {
                     state.selectedCategories.remove(preference)
                 } else {
-                    state.selectedCategories.insert(preference)
+                    state.selectedCategories = [preference]
                 }
                 return .send(.fetchFirstPage)
             case .setSortDirection(let sortDirection):

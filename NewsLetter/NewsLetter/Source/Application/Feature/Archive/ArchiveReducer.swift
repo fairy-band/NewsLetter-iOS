@@ -66,13 +66,13 @@ struct ArchiveNewsletter: Identifiable, Equatable {
         )
     }
 
-    init(card: Card) {
+    init(card: Card, categoryTheme: ContentCategoryTheme? = nil) {
         self.init(
             id: card.id,
             title: card.title,
             keyword: card.topKeyword,
             newsletterName: card.newsletterName,
-            categoryTheme: card.categoryTheme,
+            categoryTheme: categoryTheme ?? UserInfo.bookmarkCategoryTheme(for: card.id) ?? card.categoryTheme,
             summary: card.summary,
             contentURL: card.contentURL,
             language: card.language,
@@ -102,8 +102,8 @@ struct ArchiveReducer {
         case sharedContentOpened(Int)
         case sharedContentOpenedResponse(Result<[Card], Error>, exposureContentID: Int)
         case sectionSelected(ArchiveSection)
-        case bookmarkToggled(Card)
-        case bookmarkUpdateFinished(Result<Void, Error>, Card, removedContent: ArchiveNewsletter?)
+        case bookmarkToggled(Card, categoryTheme: ContentCategoryTheme? = nil)
+        case bookmarkUpdateFinished(Result<Void, Error>, Card, removedContent: ArchiveNewsletter?, categoryTheme: ContentCategoryTheme)
         case contentSelected(ArchiveNewsletter)
         case delegate(Delegate)
     }
@@ -144,7 +144,7 @@ struct ArchiveReducer {
                 }
 
             case .savedContentsResponse(.success(let cards)):
-                state.savedContents = cards.map(ArchiveNewsletter.init(card:))
+                state.savedContents = cards.map { ArchiveNewsletter(card: $0) }
                 state.isSavedContentsLoading = false
                 return .none
 
@@ -168,7 +168,7 @@ struct ArchiveReducer {
                 .cancellable(id: CancelID.sharedContentsRequest, cancelInFlight: true)
 
             case .sharedContentsResponse(.success(let cards)):
-                state.sharedContents = cards.map(ArchiveNewsletter.init(card:))
+                state.sharedContents = cards.map { ArchiveNewsletter(card: $0) }
                 state.isSharedContentsLoading = false
                 return .none
 
@@ -201,7 +201,7 @@ struct ArchiveReducer {
                 .cancellable(id: CancelID.sharedContentsRequest, cancelInFlight: true)
 
             case .sharedContentOpenedResponse(.success(let cards), let exposureContentID):
-                state.sharedContents = cards.map(ArchiveNewsletter.init(card:))
+                state.sharedContents = cards.map { ArchiveNewsletter(card: $0) }
                 state.isSharedContentsLoading = false
                 guard let content = state.sharedContents.first(where: { $0.id == exposureContentID }) else {
                     print("[ArchiveReducer] shared content not found: \(exposureContentID)")
@@ -219,15 +219,16 @@ struct ArchiveReducer {
                 state.selectedSection = section
                 return .none
 
-            case .bookmarkToggled(let card):
+            case .bookmarkToggled(let card, let categoryTheme):
                 guard let userId = UserInfo.userId else { return .none }
 
+                let theme = categoryTheme ?? UserInfo.bookmarkCategoryTheme(for: card.id) ?? card.categoryTheme
                 let removedContent = state.savedContents.first { $0.id == card.id }
                 if removedContent != nil {
                     state.savedContents.removeAll { $0.id == card.id }
                 } else {
                     state.savedContents.append(
-                        ArchiveNewsletter(card: card)
+                        ArchiveNewsletter(card: card, categoryTheme: theme)
                     )
                 }
 
@@ -240,16 +241,17 @@ struct ArchiveReducer {
                                 isBookmarked: removedContent == nil
                             )
                         )
-                        await send(.bookmarkUpdateFinished(.success(()), card, removedContent: removedContent))
+                        await send(.bookmarkUpdateFinished(.success(()), card, removedContent: removedContent, categoryTheme: theme))
                     } catch {
-                        await send(.bookmarkUpdateFinished(.failure(error), card, removedContent: removedContent))
+                        await send(.bookmarkUpdateFinished(.failure(error), card, removedContent: removedContent, categoryTheme: theme))
                     }
                 }
 
-            case .bookmarkUpdateFinished(.success, _, _):
+            case .bookmarkUpdateFinished(.success, let card, let removedContent, let categoryTheme):
+                UserInfo.setBookmarkCategoryTheme(removedContent == nil ? categoryTheme : nil, for: card.id)
                 return .none
 
-            case .bookmarkUpdateFinished(.failure(let error), let card, let removedContent):
+            case .bookmarkUpdateFinished(.failure(let error), let card, let removedContent, _):
                 if let removedContent {
                     state.savedContents.append(removedContent)
                 } else {

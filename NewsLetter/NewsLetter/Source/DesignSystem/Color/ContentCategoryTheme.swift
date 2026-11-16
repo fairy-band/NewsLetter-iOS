@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-enum ContentCategoryTheme: Equatable {
+enum ContentCategoryTheme: String, Codable {
     case android
     case iOS
     case frontend
@@ -38,7 +38,7 @@ enum ContentCategoryTheme: Equatable {
         case .devops:
             return (ColorPalette.pointBlue300, ColorPalette.pointBlue600)
         case .ai:
-            return (ColorPalette.pointOrange400, ColorPalette.pointOrange700)
+            return (ColorPalette.pointLemonYellow300, ColorPalette.pointLemonYellow700)
         case .general:
             return (ColorPalette.pointLemonYellow300, ColorPalette.pointLemonYellow700)
         }

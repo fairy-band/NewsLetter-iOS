@@ -16,6 +16,22 @@ struct HomeView: View {
     @State private var isPresentJobChangeConfirmAlert = false
     @State private var pendingJobChangeCommit: (() -> Void)?
 
+    private var isBottomSheetPresented: Bool {
+        if store.isPresentOnboardingJobBottomSheet
+            || store.isPresentNotificationPermissionBottomSheet
+            || store.isPresentNewsletterReportBottomSheet {
+            return true
+        }
+
+        return store.recommendPath.contains { destination in
+            switch destination {
+            case .setting(let setting):
+                return setting.isPresentJobDetailBottomSheet
+                    || setting.isPresentNotificationPermissionBottomSheet
+            }
+        }
+    }
+
     var body: some View {
         TabView(selection: $store.selectedTab) {
             NavigationStack(path: $store.scope(state: \.recommendPath, action: \.recommendPath)) {
@@ -59,7 +75,9 @@ struct HomeView: View {
             store.send(.archive(.onAppear))
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            BottomTabBar(selectedTab: $store.selectedTab)
+            if !isBottomSheetPresented {
+                BottomTabBar(selectedTab: $store.selectedTab)
+            }
         }
         .overlay {
             if store.isPresentModal, let selectedIndex = store.selectedIndex {
@@ -89,7 +107,7 @@ struct HomeView: View {
                     isExploreDetailAnalytics: true,
                     isShareEnabled: true,
                     isBookmarked: isBookmarked(card),
-                    bookmarkTapHandler: { toggleBookmark(card) }
+                    bookmarkTapHandler: { toggleBookmark(card, categoryTheme: categoryTheme) }
                 )
                 .frame(width: Device.width)
                 .transition(.opacity)
@@ -107,7 +125,7 @@ struct HomeView: View {
                     isExploreDetailAnalytics: false,
                     isShareEnabled: true,
                     isBookmarked: isBookmarked(content.card),
-                    bookmarkTapHandler: { toggleBookmark(content.card) }
+                    bookmarkTapHandler: { toggleBookmark(content.card, categoryTheme: content.categoryTheme) }
                 )
                 .frame(width: Device.width)
                 .transition(.opacity)
@@ -195,8 +213,8 @@ struct HomeView: View {
         store.archiveState.savedContents.contains { $0.id == card.id }
     }
 
-    private func toggleBookmark(_ card: Card) {
-        store.send(.archive(.bookmarkToggled(card)))
+    private func toggleBookmark(_ card: Card, categoryTheme: ContentCategoryTheme? = nil) {
+        store.send(.archive(.bookmarkToggled(card, categoryTheme: categoryTheme)))
     }
 
     private func onboardingJobDetailBottomSheetConfirmHandler(
