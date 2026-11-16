@@ -7,7 +7,6 @@
 
 import ComposableArchitecture
 import Foundation
-import KakaoSDKShare
 
 @Reducer
 struct AppReducer {
@@ -82,12 +81,7 @@ struct AppReducer {
                 return .none
 
             case let .openURL(url):
-                guard ShareApi.isKakaoTalkSharingUrl(url) else { return .none }
-                let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
-                guard let sharedContentID = queryItems
-                    .first(where: { $0.name == "exposureContentId" })?
-                    .value
-                    .flatMap(Int.init) else {
+                guard let sharedContentID = SharedContentLink.contentID(from: url) else {
                     return .none
                 }
 

@@ -80,11 +80,11 @@ struct HomeView: View {
             }
         }
         .overlay {
-            if store.isPresentExploreCard, let (card, colorPaletteName) = store.exploreState.selectedCard {
+            if store.isPresentExploreCard, let (card, categoryTheme) = store.exploreState.selectedCard {
                 ExploreCardModalView(
                     isPresented: $store.isPresentExploreCard,
                     cardData: card,
-                    pointColor: colorPaletteName.color.toChangeColor(),
+                    pointColor: categoryTheme.detailColor,
                     isDetailAnalyticsEnabled: true,
                     isExploreDetailAnalytics: true,
                     isShareEnabled: true,
@@ -102,7 +102,7 @@ struct HomeView: View {
                 ExploreCardModalView(
                     isPresented: $store.isPresentArchiveCard,
                     cardData: content.card,
-                    pointColor: content.color.color.toChangeColor(),
+                    pointColor: content.categoryTheme.detailColor,
                     isDetailAnalyticsEnabled: false,
                     isExploreDetailAnalytics: false,
                     isShareEnabled: true,

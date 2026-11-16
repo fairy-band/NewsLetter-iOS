@@ -84,6 +84,10 @@ struct JobDetailBottomSheet: View {
                         CellTypeData.init(
                             text: "DevOps",
                             imageURL: "devops_icon"
+                        ),
+                        CellTypeData.init(
+                            text: "AI",
+                            imageURL: "ai_icon"
                         )
                     ]),
                     selectedIndex: .constant(nil),

@@ -58,7 +58,7 @@ struct ArchiveNewsletterCard: View {
             }
         }
         .frame(maxWidth: .infinity, minHeight: 112, maxHeight: 112, alignment: .leading)
-        .background(content.color.color)
+        .background(content.categoryTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
@@ -70,7 +70,7 @@ struct ArchiveNewsletterCard: View {
             title: "네온, PostgreSQL 전문가도\n놓친 치명적 실수",
             keyword: "PostgreSQL",
             newsletterName: "데브 위클리",
-            color: .blue
+            categoryTheme: .backend
         ),
         showsBookmark: true,
         bookmarkTapHandler: {},

@@ -31,6 +31,6 @@ let defaultColorSet: [ColorSet] = [
 
 extension [Card] {
     var colorSet: [ColorSet] {
-        defaultColorSet
+        map(\.categoryTheme.colorSet)
     }
 }

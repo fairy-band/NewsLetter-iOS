@@ -11,7 +11,7 @@ import Combine
 import ComposableArchitecture
 
 private extension Preference {
-    // GET /api/newsletters/explore/contents 의 categoryIds 파라미터 스펙 (1: BE, 2: FE, 3: iOS, 4: Android, 5: DevOps)
+    // GET /api/newsletters/explore/contents 의 categoryIds 파라미터 스펙
     var exploreCategoryId: String {
         switch self {
         case .backend:  return "1"
@@ -19,6 +19,7 @@ private extension Preference {
         case .iOS:      return "3"
         case .android:  return "4"
         case .devops:   return "5"
+        case .ai:       return "6"
         }
     }
 }
@@ -27,14 +28,9 @@ private extension Preference {
 struct ExploreReducer {
     @ObservableState
     struct State {
-        var colorList: [ColorPaletteName] = [
-            .pointGreen300, .pointPink300,
-            .pointLemonYellow300, .pointBlue300,
-            .pointOrange300, .pointPurple300
-        ]
         var data: [ExploreCard] = []
         var sortDirection: SortDirection = .desc
-        var selectedCard: (Card, ColorPaletteName)? = nil
+        var selectedCard: (Card, ContentCategoryTheme)? = nil
         var selectedCategories: Set<Preference> = []
         var hasMore: Bool = false
         var nextOffset: Int = 0
@@ -49,7 +45,7 @@ struct ExploreReducer {
         case fetchNextPage
         case fetchExploreCards(Int)
         case setResponse(ExploreCardResponse, isFirstPage: Bool, prevData: [ExploreCard])
-        case setSelectedCard((Card, ColorPaletteName))
+        case setSelectedCard((Card, ContentCategoryTheme))
         case toggleCategory(Preference?)
         case setSortDirection(SortDirection)
         case setIsLoading(Bool)
