@@ -2,7 +2,7 @@ import Foundation
 
 enum SharedContentLink {
     static func url(for contentID: Int) -> URL {
-        URL(string: "soak://contents/share/\(contentID)")!
+        URL(string: "https://\(AppInfo.universalLinkHost)/share/\(contentID)")!
     }
 
     static func contentID(from url: URL) -> Int? {
