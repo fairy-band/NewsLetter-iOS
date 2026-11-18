@@ -27,7 +27,8 @@ struct NewsletterReportBottomSheet: View {
         ("iOS",    "ios_icon"),
         ("FE",     "fe_icon"),
         ("BE",     "be_icon"),
-        ("DevOps", "devops_icon")
+        ("DevOps", "devops_icon"),
+        ("AI",     "ai_icon")
     ]
 
     var body: some View {

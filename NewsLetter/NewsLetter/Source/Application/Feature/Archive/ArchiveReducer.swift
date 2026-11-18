@@ -66,6 +66,7 @@ struct ArchiveNewsletter: Identifiable, Equatable {
     let contentURL: String
     let language: String
     let kind: Card.Kind
+    let categoryName: String?
 
     init(
         id: Int,
@@ -76,7 +77,8 @@ struct ArchiveNewsletter: Identifiable, Equatable {
         summary: String = "뉴스레터 본문 미리보기입니다.",
         contentURL: String = "https://example.com",
         language: String = "KOREAN",
-        kind: Card.Kind = .blog
+        kind: Card.Kind = .blog,
+        categoryName: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -87,6 +89,7 @@ struct ArchiveNewsletter: Identifiable, Equatable {
         self.contentURL = contentURL
         self.language = language
         self.kind = kind
+        self.categoryName = categoryName
     }
 
     var card: Card {
@@ -99,7 +102,8 @@ struct ArchiveNewsletter: Identifiable, Equatable {
             imageURL: nil,
             newsletterName: newsletterName,
             language: language,
-            kind: kind
+            kind: kind,
+            categoryName: categoryName
         )
     }
 
@@ -113,7 +117,8 @@ struct ArchiveNewsletter: Identifiable, Equatable {
             summary: card.summary,
             contentURL: card.contentURL,
             language: card.language,
-            kind: card.kind
+            kind: card.kind,
+            categoryName: card.categoryName
         )
     }
 }

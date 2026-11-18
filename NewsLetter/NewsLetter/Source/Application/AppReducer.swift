@@ -7,7 +7,6 @@
 
 import ComposableArchitecture
 import Foundation
-import KakaoSDKShare
 
 @Reducer
 struct AppReducer {
@@ -82,7 +81,9 @@ struct AppReducer {
                 return .none
 
             case let .openURL(url):
-                guard let sharedContentID = Self.sharedContentID(from: url) else { return .none }
+                guard let sharedContentID = SharedContentLink.contentID(from: url) else {
+                    return .none
+                }
 
                 guard state.isRemoteConfigResolved else {
                     state.pendingSharedContentID = sharedContentID
@@ -98,29 +99,6 @@ struct AppReducer {
                 return .none
             }
         }
-    }
-
-    /// 카카오톡 공유 링크(exposureContentId 쿼리), 커스텀 스킴(soak://share/{id}),
-    /// Universal Link(https://<universalLinkHost>/share/{id})에서 콘텐츠 ID를 꺼냅니다
-    static func sharedContentID(from url: URL) -> Int? {
-        if ShareApi.isKakaoTalkSharingUrl(url) {
-            return URLComponents(url: url, resolvingAgainstBaseURL: false)?
-                .queryItems?
-                .first(where: { $0.name == "exposureContentId" })?
-                .value
-                .flatMap(Int.init)
-        }
-        // 웹의 '앱으로 열기' 버튼: soak://share/{id} → host "share", pathComponents ["/", "{id}"]
-        if url.scheme == "soak" {
-            guard url.host == "share", url.pathComponents.count == 2 else { return nil }
-            return Int(url.pathComponents[1])
-        }
-        let components = url.pathComponents  // ["/", "share", "{id}"]
-        guard url.scheme == "https",
-              url.host == AppInfo.universalLinkHost,
-              components.count == 3,
-              components[1] == "share" else { return nil }
-        return Int(components[2])
     }
 
     private func openPendingSharedContent(_ state: inout State) -> Effect<Action> {
