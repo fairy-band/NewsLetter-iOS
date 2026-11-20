@@ -18,7 +18,6 @@ struct CarouselCard: View {
         static let nextButtonHeight: CGFloat = 44
     }
 
-    @StateObject private var kakaoShareManager = KakaoShareManager()
     @State private var isMarkdownPresented: Bool = false
     let card: Card
     let index: Int
@@ -124,16 +123,7 @@ struct CarouselCard: View {
                 .layoutPriority(1)
 
                 if isShareEnabled {
-                    Button {
-                        Task {
-                            await kakaoShareManager.shareToKakao(
-                                title: card.title,
-                                id: card.id,
-                                textColor: pointColor,
-                                contentURL: card.contentURL
-                            )
-                        }
-                    } label: {
+                    ShareLink(item: SharedContentLink.url(for: card.id)) {
                         RoundedRectangle(cornerRadius: Metric.shareButtonSize/2)
                             .stroke(.semanticColor.border_secondary, style: .init(lineWidth: 1))
                             .background(ColorPalette.white)
@@ -146,6 +136,7 @@ struct CarouselCard: View {
                             }
                     }
                     .foregroundStyle(.semanticColor.text_primary)
+                    .accessibilityLabel("공유하기")
                 }
 
                 Button(action: bookmarkTapHandler) {

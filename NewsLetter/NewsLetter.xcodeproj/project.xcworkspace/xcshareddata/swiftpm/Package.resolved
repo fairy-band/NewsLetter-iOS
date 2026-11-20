@@ -1,5 +1,5 @@
 {
-  "originHash" : "b6435caf62e8446093e9626c866aca2e31d00aa9503e78cdebf728124e8a9ba4",
+  "originHash" : "3bcc23fa20397122152430b7008543f6ec21a3a8e71ea5cbc1cf72063eb26ed4",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -110,15 +110,6 @@
       }
     },
     {
-      "identity" : "kakao-ios-sdk",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kakao/kakao-ios-sdk",
-      "state" : {
-        "revision" : "5978979157a5a0521c9c56fd0156aec794caa21c",
-        "version" : "2.27.2"
-      }
-    },
-    {
       "identity" : "leveldb",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/firebase/leveldb.git",
@@ -204,8 +195,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-composable-architecture.git",
       "state" : {
-        "revision" : "1eaa6fa2ee57ac42843283b9fd3457af408c858d",
-        "version" : "1.25.5"
+        "revision" : "ead11e04e5011c437722c1990d22f80d87056978",
+        "version" : "1.26.1"
       }
     },
     {
@@ -267,8 +258,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-sharing",
       "state" : {
-        "revision" : "bc27f8322bc30f6ce7d864d137dc77a6de8b57eb",
-        "version" : "2.8.0"
+        "revision" : "c525e53936c878c102421eee241d82711eb38104",
+        "version" : "2.8.1"
       }
     },
     {

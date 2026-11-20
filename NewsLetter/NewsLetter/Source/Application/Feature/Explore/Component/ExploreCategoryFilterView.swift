@@ -18,6 +18,7 @@ private let exploreCategoryChips: [ExploreCategoryChip] = [
     ExploreCategoryChip(id: .frontend, title: "FE", iconName: "fe_icon"),
     ExploreCategoryChip(id: .backend, title: "BE", iconName: "be_icon"),
     ExploreCategoryChip(id: .devops, title: "DevOps", iconName: "devops_icon"),
+    ExploreCategoryChip(id: .ai, title: "AI", iconName: "ai_icon"),
 ]
 
 struct ExploreCategoryFilterView: View {

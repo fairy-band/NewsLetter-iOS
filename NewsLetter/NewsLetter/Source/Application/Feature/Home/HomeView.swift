@@ -16,6 +16,22 @@ struct HomeView: View {
     @State private var isPresentJobChangeConfirmAlert = false
     @State private var pendingJobChangeCommit: (() -> Void)?
 
+    private var isBottomSheetPresented: Bool {
+        if store.isPresentOnboardingJobBottomSheet
+            || store.isPresentNotificationPermissionBottomSheet
+            || store.isPresentNewsletterReportBottomSheet {
+            return true
+        }
+
+        return store.recommendPath.contains { destination in
+            switch destination {
+            case .setting(let setting):
+                return setting.isPresentJobDetailBottomSheet
+                    || setting.isPresentNotificationPermissionBottomSheet
+            }
+        }
+    }
+
     var body: some View {
         TabView(selection: $store.selectedTab) {
             NavigationStack(path: $store.scope(state: \.recommendPath, action: \.recommendPath)) {
@@ -59,7 +75,9 @@ struct HomeView: View {
             store.send(.archive(.onAppear))
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            BottomTabBar(selectedTab: $store.selectedTab)
+            if !isBottomSheetPresented {
+                BottomTabBar(selectedTab: $store.selectedTab)
+            }
         }
         .overlay {
             if store.isPresentModal, let selectedIndex = store.selectedIndex {
